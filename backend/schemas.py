@@ -17,6 +17,16 @@ class RecordSchema(BaseModel):
     class Config:
         from_attributes = True
 
+class RecordUpdate(BaseModel):
+    title: Optional[str] = None
+    artist: Optional[str] = None
+    genre: Optional[str] = None
+    year: Optional[int] = None
+    cover_image: Optional[str] = None
+    price: Optional[float] = None
+    stock_quantity: Optional[int] = None
+    description: Optional[str] = None
+
 class UserCreate(BaseModel):
     username: str
     email: EmailStr

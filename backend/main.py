@@ -1,11 +1,12 @@
 from fastapi import FastAPI, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 from database import SessionLocal, engine, get_db
-from typing import List
+from typing import List, Optional
 import models, schemas, auth
 from fastapi.middleware.cors import CORSMiddleware
 from auth import get_current_user
 from fastapi.security import OAuth2PasswordRequestForm
+from discogs import get_discogs_metadata
 
 models.Base.metadata.create_all(bind=engine)
 
@@ -24,17 +25,45 @@ def read_root():
     return {"message": f"Welcome to the {app.title}"}
 
 @app.get("/records", response_model=List[schemas.RecordSchema])
-def get_records(db: Session = Depends(get_db)):
-    records = db.query(models.Record).all()
-    return records
+def get_records(
+    db: Session = Depends(get_db),
+    search: Optional[str] = None,
+    genre: Optional[str] = None,
+    min_price: Optional[float] = None,
+    max_price: Optional[float] = None
+):
+    query = db.query(models.Record)
+
+    if search:
+        query = query.filter(
+            (models.Record.title.ilike(f"%{search}%")) | 
+            (models.Record.artist.ilike(f"%{search}%"))
+        )
+
+    if genre:
+        query = query.filter(models.Record.genre == genre)
+
+    if min_price is not None:
+        query = query.filter(models.Record.price >= min_price)
+    if max_price is not None:
+        query = query.filter(models.Record.price <= max_price)
+
+    return query.all()
 
 @app.get("/records/{record_id}")
-def get_record(record_id: int):
+async def get_record(record_id: int, db: Session = Depends(get_db)):
+    record = db.query(models.Record).filter(models.Record.id == record_id).first()
+    
+    if not record:
+        raise HTTPException(status_code=404, detail="Record not found in our store")
+
+    external_data = {}
+    if record.discogs_id:
+        external_data = await get_discogs_metadata(record.discogs_id)
+
     return {
-        "id": record_id,
-        "title": "Sample Record",
-        "artist": "Sample Artist",
-        "status": "Success"
+        "store_details": record,
+        "discogs_metadata": external_data
     }
 
 @app.post("/orders", status_code=201)
@@ -158,3 +187,37 @@ def login(form_data: OAuth2PasswordRequestForm = Depends(), db: Session = Depend
 @app.get("/users/me")
 def read_users_me(current_user: models.User = Depends(get_current_user)):
     return current_user
+
+@app.patch("/admin/records/{record_id}")
+def patch_record(
+    record_id: int, 
+    update_data: schemas.RecordUpdate,
+    db: Session = Depends(get_db),
+    admin: models.User = Depends(get_current_admin)
+):
+    record = db.query(models.Record).filter(models.Record.id == record_id).first()
+    if not record:
+        raise HTTPException(status_code=404, detail="Record not found")
+    
+    update_dict = update_data.model_dump(exclude_unset=True)
+    
+    for key, value in update_dict.items():
+        setattr(record, key, value)
+    
+    db.commit()
+    db.refresh(record)
+    return record
+
+@app.delete("/admin/records/{record_id}")
+def delete_record(
+    record_id: int, 
+    db: Session = Depends(get_db),
+    admin: models.User = Depends(get_current_admin)
+):
+    record = db.query(models.Record).filter(models.Record.id == record_id).first()
+    if not record:
+        raise HTTPException(status_code=404, detail="Record not found")
+    
+    db.delete(record)
+    db.commit()
+    return {"message": "Record deleted from inventory"}
