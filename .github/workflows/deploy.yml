@@ -44,14 +44,14 @@ jobs:
             aws ecr get-login-password --region eu-west-1 | docker login --username AWS --password-stdin ${{ steps.login-ecr.outputs.registry }}
             
             # Stop any existing container
-            docker stop music-api || true
-            docker rm music-api || true
+            sudo docker stop music-api || true
+            sudo docker rm music-api || true
             
             # Pull the latest image and run
-            docker pull ${{ steps.login-ecr.outputs.registry }}/record-store-backend:latest
-            docker run -d \
+            sudo docker pull ${{ steps.login-ecr.outputs.registry }}/record-store-backend:latest
+            sudo docker run -d \
               --name music-api \
               -p 80:8000 \
               --restart always \
               ${{ steps.login-ecr.outputs.registry }}/record-store-backend:latest
-            docker exec music-api alembic upgrade head
+            sudo docker exec music-api alembic upgrade head

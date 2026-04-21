@@ -14,9 +14,13 @@ resource "aws_instance" "api_server" {
   user_data = <<-EOF
               #!/bin/bash
               apt-get update -y
-              apt-get install -y docker.io
+              apt-get install -y docker.io awscli
+
               systemctl start docker
               systemctl enable docker
+
+              usermod -aG docker ubuntu
+              newgrp docker
               
               # docker pull my-docker-hub-username/record-store-backend:latest              
               # docker run -d -p 8000:8000 --env-file .env my-image-name
