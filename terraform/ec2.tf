@@ -7,9 +7,10 @@ resource "aws_instance" "api_server" {
   ami           = "ami-0324bce2436ce02b2"
   instance_type = "t3.micro"
   
-  subnet_id     = aws_subnet.public_1.id
+  subnet_id              = aws_subnet.public_1.id
   vpc_security_group_ids = [aws_security_group.web_sg.id]
   key_name               = aws_key_pair.deployer.key_name
+  iam_instance_profile   = aws_iam_instance_profile.ec2_profile.name
 
   user_data = <<-EOF
               #!/bin/bash
