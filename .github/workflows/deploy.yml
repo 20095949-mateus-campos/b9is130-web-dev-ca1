@@ -41,14 +41,13 @@ jobs:
     steps:
       - name: Deploy to EC2 via SSH
         uses: appleboy/ssh-action@v1.0.3
+        env:
+          REGISTRY_URL: ${{ needs.build-and-push.outputs.registry_url }}
         with:
           host: ${{ secrets.EC2_HOST }}
           username: ubuntu
           key: ${{ secrets.EC2_SSH_KEY }}
           envs: REGISTRY_URL
-        env:
-          REGISTRY_URL: ${{ needs.build-and-push.outputs.registry_url }}
-        with:
           script: |
             export AWS_ACCESS_KEY_ID=${{ secrets.AWS_ACCESS_KEY_ID }}
             export AWS_SECRET_ACCESS_KEY=${{ secrets.AWS_SECRET_ACCESS_KEY }}
