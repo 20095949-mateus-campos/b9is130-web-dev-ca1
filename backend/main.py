@@ -4,7 +4,7 @@ from database import SessionLocal, engine, get_db
 from typing import List, Optional
 import models, schemas, auth
 from fastapi.middleware.cors import CORSMiddleware
-from auth import get_current_user
+from auth import get_current_user, get_current_admin
 from fastapi.security import OAuth2PasswordRequestForm
 from discogs import get_discogs_metadata
 
