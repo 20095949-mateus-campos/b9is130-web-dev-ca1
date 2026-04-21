@@ -49,6 +49,7 @@ async def seed_database():
                     artist=data.get('artists')[0].get('name') if data.get('artists') else "Unknown",
                     genre=data.get('genres')[0] if data.get('genres') else "Unknown",
                     year=data.get('year'),
+                    cover_image=data.get('images')[0].get('resource_url') if data.get('images') else None,
                     price=data.get('lowest_price'),
                     stock_quantity=5,
                     description=f"Format: {data.get('formats')[0].get('name') if data.get('formats') else 'Vinyl'}"

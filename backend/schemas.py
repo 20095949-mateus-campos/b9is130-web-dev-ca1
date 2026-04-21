@@ -9,6 +9,7 @@ class RecordSchema(BaseModel):
     artist: str
     genre: Optional[str]
     year: Optional[int]
+    cover_image: Optional[str] = None
     price: float
     stock_quantity: int
     description: Optional[str]

@@ -27,6 +27,7 @@ class Record(Base):
     artist = Column(String(255), nullable=False)
     genre = Column(String(100))
     year = Column(Integer)
+    cover_image = Column(String(500), nullable=True)
     
     price = Column(Float, nullable=False)
     stock_quantity = Column(Integer, default=0)
