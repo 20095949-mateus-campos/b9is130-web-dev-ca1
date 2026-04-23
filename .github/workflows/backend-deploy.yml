@@ -47,7 +47,9 @@ jobs:
     steps:
       - name: Copy Nginx config to EC2
         run: |
-          scp -o StrictHostKeyChecking=no backend/nginx.conf ubuntu@${{ env.EC2_HOST }}:/home/ubuntu/nginx.conf
+          pwd
+          ls -R
+          scp -o StrictHostKeyChecking=no ${{ github.workspace }}/backend/nginx.conf ubuntu@${{ env.EC2_HOST }}:/home/ubuntu/nginx.conf
       - name: Deploy to EC2 via SSH
         uses: appleboy/ssh-action@v1.0.3
         env:
