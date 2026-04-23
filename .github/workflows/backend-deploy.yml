@@ -83,7 +83,7 @@ jobs:
               -e DB_PORT=${{ secrets.DB_PORT }} \
               --restart always $REGISTRY_URL/record-store-backend:latest
 
-            sed -i "s/\${DOMAIN_NAME}/***/g" /home/ubuntu/nginx.conf
+            sed -i "s/\${DOMAIN_NAME}/${{ secrets.DOMAIN_NAME }}/g" /home/ubuntu/nginx.conf
             sudo cp /home/ubuntu/nginx.conf /etc/nginx/sites-available/music-api
             sudo ln -sf /etc/nginx/sites-available/music-api /etc/nginx/sites-enabled/music-api
             sudo rm /etc/nginx/sites-enabled/default
