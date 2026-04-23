@@ -14,3 +14,11 @@ resource "aws_db_instance" "mysql_db" {
 
   vpc_security_group_ids = [aws_security_group.db_sg.id]
 }
+
+output "rds_endpoint" {
+  value = aws_db_instance.mysql_db.endpoint
+}
+
+output "database_name" {
+  value = aws_db_instance.mysql_db.db_name
+}
