@@ -7,18 +7,25 @@ from fastapi.middleware.cors import CORSMiddleware
 from auth import get_current_user, get_current_admin
 from fastapi.security import OAuth2PasswordRequestForm
 from discogs import get_discogs_metadata
+import os
+from dotenv import load_dotenv
+
+load_dotenv()
 
 app = FastAPI(title="Music Record Store API")
 
+FRONTEND_URL = os.getenv("FRONTEND_URL", "http://localhost:5173")
+
 origins = [
+    FRONTEND_URL,
     "http://b9is130-record-store-api-frontend.s3-website-eu-west-1.amazonaws.com",
     "https://b9is130-web-dev-ca1.duckdns.org",
-    "http://localhost:5173",
+    "http://localhost:3000",
 ]
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],

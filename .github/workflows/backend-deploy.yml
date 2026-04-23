@@ -81,6 +81,7 @@ jobs:
               -e DB_PASSWORD=${{ secrets.DB_PASSWORD }} \
               -e DB_NAME=${{ secrets.DB_NAME }} \
               -e DB_PORT=${{ secrets.DB_PORT }} \
+              -e FRONTEND_URL="${{ secrets.CLOUDFRONT_DOMAIN }}" \
               --restart always $REGISTRY_URL/record-store-backend:latest
 
             sed -i "s/\${DOMAIN_NAME}/${{ secrets.DOMAIN_NAME }}/g" /home/ubuntu/nginx.conf

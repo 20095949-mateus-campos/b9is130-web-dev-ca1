@@ -26,6 +26,12 @@ variable "duckdns_token" {
   sensitive   = true
 }
 
+variable "github_token" {
+  description = "GitHub Personal Access Token"
+  type        = string
+  sensitive   = true
+}
+
 data "http" "my_public_ip" {
   url = "https://icanhazip.com/"
 }

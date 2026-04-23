@@ -15,6 +15,12 @@ resource "aws_db_instance" "mysql_db" {
   vpc_security_group_ids = [aws_security_group.db_sg.id]
 }
 
+resource "github_actions_secret" "db_host" {
+  repository      = "b9is130-web-dev-ca1"
+  secret_name     = "DB_HOST"
+  value = aws_db_instance.mysql_db.address 
+}
+
 output "rds_endpoint" {
   value = aws_db_instance.mysql_db.endpoint
 }

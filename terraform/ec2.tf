@@ -63,6 +63,12 @@ resource "aws_instance" "api_server" {
   }
 }
 
+resource "github_actions_secret" "ec2_host" {
+  repository      = "b9is130-web-dev-ca1"
+  secret_name     = "EC2_HOST"
+  value = aws_instance.api_server.public_ip
+}
+
 output "api_server_ip" {
   value = aws_instance.api_server.public_ip
 }
