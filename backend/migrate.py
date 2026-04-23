@@ -3,9 +3,13 @@ from sqlalchemy import inspect
 import subprocess
 import sys
 import asyncio
-from database import engine
+from database import engine, Base
 from seed import seed_database
 import models
+import os
+from dotenv import load_dotenv
+
+load_dotenv()
 
 def run_command(command):
     print(f"Executing: {command}")
