@@ -70,16 +70,33 @@ jobs:
 
             TABLE_EXISTS=$(sudo docker exec music-api python3 -c "
             import os, sqlalchemy
-            url = os.getenv('DATABASE_URL')
-            engine = sqlalchemy.create_engine(url)
-            inspector = sqlalchemy.inspect(engine)
-            print('alembic_version' in inspector.get_table_names())
+            from sqlalchemy import inspect
+            user, pw, host, port, db = os.getenv('DB_USER'), os.getenv('DB_PASSWORD'), os.getenv('DB_HOST'), os.getenv('DB_PORT'), os.getenv('DB_NAME')
+            url = f'mysql+pymysql://{user}:{pw}@{host}:{port}/{db}'
+            try:
+                engine = sqlalchemy.create_engine(url)
+                inspector = inspect(engine)
+                print('alembic_version' in inspector.get_table_names())
+            except Exception:
+                print('False')
             ")
 
             if [ "$TABLE_EXISTS" == "False" ]; then
-                echo "First time deployment detected. Stamping database..."
-                sudo docker exec music-api alembic stamp head
+                echo "Alembic history not found. Checking if tables exist to decide between Stamp or Upgrade..."
+                HAS_TABLES=$(sudo docker exec music-api python3 -c "
+            import os, sqlalchemy
+            url = f\"mysql+pymysql://{os.getenv('DB_USER')}:{os.getenv('DB_PASSWORD')}@{os.getenv('DB_HOST')}:{os.getenv('DB_PORT')}/{os.getenv('DB_NAME')}\"
+            engine = sqlalchemy.create_engine(url)
+            print('users' in sqlalchemy.inspect(engine).get_table_names())
+            ")
+                if [ "$HAS_TABLES" == "True" ]; then
+                    echo "Tables exist without history. Stamping 'head'..."
+                    sudo docker exec music-api alembic stamp head
+                else
+                    echo "Fresh database. Running full migration..."
+                    sudo docker exec music-api alembic upgrade head
+                fi
             else
-                echo "Database already versioned. Running migrations..."
+                echo "Alembic history found. Running incremental migrations..."
                 sudo docker exec music-api alembic upgrade head
             fi
