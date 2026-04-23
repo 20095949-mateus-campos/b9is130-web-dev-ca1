@@ -15,19 +15,47 @@ resource "aws_instance" "api_server" {
   user_data = <<-EOF
               #!/bin/bash
               apt-get update -y
-              apt-get install -y docker.io unzip
+              apt-get install -y nginx certbot python3-certbot-nginx docker.io unzip
 
               curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
               unzip awscliv2.zip
               sudo ./aws/install
 
+              sudo systemctl start nginx
+              sudo systemctl enable nginx
               systemctl start docker
               systemctl enable docker
-
               usermod -aG docker ubuntu
+
+              mkdir -p /home/ubuntu/duckdns
+              cat << 'DUCKSCRIPT' > /home/ubuntu/duckdns/duck.sh
+              #!/bin/bash
+              DOMAIN="${var.duckdns_domain}"
+              TOKEN="${var.duckdns_token}"
+              IP_FILE="/home/ubuntu/duckdns/last_ip.txt"
+
+              CURRENT_IP=$(curl -s https://checkip.amazonaws.com)
+
+              if [ -f "$IP_FILE" ]; then
+                  LAST_IP=$(cat "$IP_FILE")
+              else
+                  LAST_IP=""
+              fi
+
+              if [ "$CURRENT_IP" != "$LAST_IP" ]; then
+                  RESPONSE=$(curl -s "https://www.duckdns.org/update?domains=$DOMAIN&token=$TOKEN&ip=$CURRENT_IP")
+                  if [ "$RESPONSE" == "OK" ]; then
+                      echo "$CURRENT_IP" > "$IP_FILE"
+                  fi
+              fi
+              DUCKSCRIPT
+
+              chmod +x /home/ubuntu/duckdns/duck.sh
+              chown -R ubuntu:ubuntu /home/ubuntu/duckdns
+
+              (crontab -u ubuntu -l 2>/dev/null; echo "*/5 * * * * /home/ubuntu/duckdns/duck.sh") | crontab -u ubuntu -
               
-              # docker pull my-docker-hub-username/record-store-backend:latest              
-              # docker run -d -p 8000:8000 --env-file .env my-image-name
+              sudo -u ubuntu /home/ubuntu/duckdns/duck.sh
               EOF
 
   tags = {
