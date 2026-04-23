@@ -50,9 +50,9 @@ jobs:
 
       - name: Copy Nginx config to EC2
         run: |
-          pwd
-          ls -R
-          scp -o StrictHostKeyChecking=no ${{ github.workspace }}/backend/nginx.conf ubuntu@${{ secrets.EC2_HOST }}:/home/ubuntu/nginx.conf
+          echo "${{ secrets.EC2_SSH_KEY }}" > private_key.pem
+          chmod 600 private_key.pem
+          scp -i private_key.pem -o StrictHostKeyChecking=no ${{ github.workspace }}/backend/nginx.conf ubuntu@${{ secrets.EC2_HOST }}:/home/ubuntu/nginx.conf
 
       - name: Deploy to EC2 via SSH
         uses: appleboy/ssh-action@v1.0.3
