@@ -11,7 +11,7 @@ from discogs import get_discogs_metadata
 app = FastAPI(title="Music Record Store API")
 
 origins = [
-    "http://b9is130-music-api-frontend-yourid.s3-website-eu-west-1.amazonaws.com",
+    "http://b9is130-record-store-api-frontend.s3-website-eu-west-1.amazonaws.com",
     "https://b9is130-web-dev-ca1.duckdns.org",
     "http://localhost:5173",
 ]
