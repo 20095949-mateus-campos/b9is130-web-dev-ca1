@@ -10,9 +10,15 @@ from discogs import get_discogs_metadata
 
 app = FastAPI(title="Music Record Store API")
 
+origins = [
+    "http://b9is130-music-api-frontend-yourid.s3-website-eu-west-1.amazonaws.com",
+    "https://b9is130-web-dev-ca1.duckdns.org",
+    "http://localhost:5173",
+]
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:5173"],
+    allow_origins=origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
