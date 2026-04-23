@@ -8,8 +8,6 @@ from auth import get_current_user, get_current_admin
 from fastapi.security import OAuth2PasswordRequestForm
 from discogs import get_discogs_metadata
 
-models.Base.metadata.create_all(bind=engine)
-
 app = FastAPI(title="Music Record Store API")
 
 app.add_middleware(

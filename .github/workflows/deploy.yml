@@ -6,6 +6,12 @@ on:
     paths:
       - 'backend/**'
   workflow_dispatch:
+    inputs:
+      reseed:
+        description: 'Check to re-run database seeding'
+        required: false
+        type: boolean
+        default: false
 
 jobs:
   build-and-push:
@@ -68,33 +74,4 @@ jobs:
               -e DB_PORT=${{ secrets.DB_PORT }} \
               --restart always $REGISTRY_URL/record-store-backend:latest
 
-            ACTION=$(sudo docker exec music-api python3 -c "
-            import os, sqlalchemy
-            from sqlalchemy import inspect
-            u, p, h, pt, db = os.getenv('DB_USER'), os.getenv('DB_PASSWORD'), os.getenv('DB_HOST'), os.getenv('DB_PORT'), os.getenv('DB_NAME')
-            url = f'mysql+pymysql://{u}:{p}@{h}:{pt}/{db}'
-            try:
-                engine = sqlalchemy.create_engine(url)
-                tables = inspect(engine).get_table_names()
-                if 'alembic_version' in tables:
-                    print('UPGRADE')
-                elif 'users' in tables or 'records' in tables:
-                    print('STAMP')
-                else:
-                    print('FRESH')
-            except Exception as e:
-                print('UPGRADE')
-            " | xargs)
-
-            echo "Detected Database State: $ACTION"
-
-            if [ "$ACTION" == "STAMP" ]; then
-                echo "Tables exist without history. Synchronizing Alembic..."
-                sudo docker exec music-api alembic stamp head
-            elif [ "$ACTION" == "FRESH" ]; then
-                echo "Fresh database detected. Creating schema..."
-                sudo docker exec music-api alembic upgrade head
-            else
-                echo "Standard deployment. Applying incremental migrations..."
-                sudo docker exec music-api alembic upgrade head
-            fi
+            sudo docker exec -e RESEED=${{ github.event.inputs.reseed || 'false' }} music-api python3 migrate.py
