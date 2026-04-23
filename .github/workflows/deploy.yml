@@ -68,4 +68,18 @@ jobs:
               -e DB_PORT=${{ secrets.DB_PORT }} \
               --restart always $REGISTRY_URL/record-store-backend:latest
 
-            sudo docker exec music-api alembic upgrade head
+            TABLE_EXISTS=$(sudo docker exec music-api python3 -c "
+            import os, sqlalchemy
+            url = os.getenv('DATABASE_URL')
+            engine = sqlalchemy.create_engine(url)
+            inspector = sqlalchemy.inspect(engine)
+            print('alembic_version' in inspector.get_table_names())
+            ")
+
+            if [ "$TABLE_EXISTS" == "False" ]; then
+                echo "First time deployment detected. Stamping database..."
+                sudo docker exec music-api alembic stamp head
+            else
+                echo "Database already versioned. Running migrations..."
+                sudo docker exec music-api alembic upgrade head
+            fi
