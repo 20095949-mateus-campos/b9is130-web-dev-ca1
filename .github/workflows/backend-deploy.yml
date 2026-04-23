@@ -45,11 +45,15 @@ jobs:
     needs: build-and-push
     runs-on: ubuntu-latest
     steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+        
       - name: Copy Nginx config to EC2
         run: |
           pwd
           ls -R
           scp -o StrictHostKeyChecking=no ${{ github.workspace }}/backend/nginx.conf ubuntu@${{ env.EC2_HOST }}:/home/ubuntu/nginx.conf
+
       - name: Deploy to EC2 via SSH
         uses: appleboy/ssh-action@v1.0.3
         env:
