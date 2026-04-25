@@ -29,7 +29,7 @@ function Cart() {
           <p className="text-right">TOTAL</p>
         </div>
 
-        {cart.length === 0 ? (
+        {!cart || cart.length === 0 ? (
           <div className="text-center mt-[4rem]">
             <p className="text-[18px] font-[600] mb-[1rem]">
               Your cart is empty
@@ -58,7 +58,7 @@ function Cart() {
 
               {/* QUANTITY */}
               <div className="flex justify-center items-center gap-3">
-                <div className="px-[20px] py-[10px] border-1 border-[var(--color-primary)] rounded-[5px]">
+                <div className="px-[20px] py-[10px] border-[var(--color-primary)] rounded-[5px]">
                   <button
                     className={`px-[15px] text-[20px] bg-transparent border-none outline-none ${
                       item.quantity === 1
