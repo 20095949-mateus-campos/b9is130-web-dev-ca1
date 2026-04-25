@@ -1,6 +1,7 @@
 from pydantic import BaseModel, EmailStr
 from typing import Optional, List
 from datetime import datetime
+from decimal import Decimal
 
 class RecordSchema(BaseModel):
     id: int
@@ -10,7 +11,7 @@ class RecordSchema(BaseModel):
     genre: Optional[str]
     year: Optional[int]
     cover_image: Optional[str] = None
-    price: float
+    price: Decimal
     stock_quantity: int
     description: Optional[str]
 
@@ -23,7 +24,7 @@ class RecordUpdate(BaseModel):
     genre: Optional[str] = None
     year: Optional[int] = None
     cover_image: Optional[str] = None
-    price: Optional[float] = None
+    price: Optional[Decimal] = None
     stock_quantity: Optional[int] = None
     description: Optional[str] = None
 
@@ -46,7 +47,7 @@ class OrderCreate(BaseModel):
 
 class OrderItemOut(BaseModel):
     record_id: int
-    unit_price: float
+    unit_price: Decimal
     quantity: int
     record_title: Optional[str] = None 
 
@@ -55,7 +56,7 @@ class OrderItemOut(BaseModel):
 
 class OrderOut(BaseModel):
     id: int
-    total_price: float
+    total_price: Decimal
     status: str
     created_at: datetime
     items: List[OrderItemOut]
@@ -78,7 +79,7 @@ class RecordCreate(BaseModel):
     genre: Optional[str] = None
     year: Optional[int] = None
     cover_image: Optional[str] = None
-    price: float
+    price: Decimal
     stock_quantity: int = 0
     description: Optional[str] = None
 
