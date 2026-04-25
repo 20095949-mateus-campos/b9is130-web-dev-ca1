@@ -10,6 +10,7 @@ from discogs import get_discogs_metadata
 import os
 from dotenv import load_dotenv
 from decimal import Decimal
+from discogs import search_discogs, get_discogs_metadata
 
 load_dotenv()
 
@@ -215,6 +216,51 @@ def delete_record(
     db.delete(record)
     db.commit()
     return {"message": "Record deleted from inventory"}
+
+@app.get("/admin/discogs/search")
+async def search_external_records(
+    q: str, 
+    admin: models.User = Depends(get_current_admin)
+):
+    results = await search_discogs(q)
+    if not results:
+        return {"results": []}
+    return results.get("results", [])
+
+@app.post("/admin/records/import/{discogs_id}", response_model=schemas.RecordSchema)
+async def import_record_from_discogs(
+    discogs_id: int,
+    price: Decimal,
+    stock: int = 1,
+    db: Session = Depends(get_db),
+    admin: models.User = Depends(get_current_admin)
+):
+    existing = db.query(models.Record).filter(models.Record.discogs_id == discogs_id).first()
+    if existing:
+        raise HTTPException(status_code=400, detail="Record already exists in store")
+
+    data = await get_discogs_metadata(discogs_id)
+    if not data:
+        raise HTTPException(status_code=404, detail="Could not find release on Discogs")
+
+    artist_name = data.get('artists', [{}])[0].get('name', 'Unknown Artist')
+    
+    new_record = models.Record(
+        discogs_id=discogs_id,
+        title=data.get('title'),
+        artist=artist_name,
+        genre=data.get('genres', ['Unknown'])[0],
+        year=data.get('year'),
+        cover_image=data.get('images', [{}])[0].get('resource_url'),
+        price=price,
+        stock_quantity=stock,
+        description=f"Imported from Discogs. Format: {data.get('formats', [{}])[0].get('name')}"
+    )
+
+    db.add(new_record)
+    db.commit()
+    db.refresh(new_record)
+    return new_record
 
 
 # --------- Cart Endpoints ---------
