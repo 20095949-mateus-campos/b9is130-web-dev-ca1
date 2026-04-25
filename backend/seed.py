@@ -4,7 +4,8 @@ import asyncio
 from dotenv import load_dotenv
 from sqlalchemy.orm import Session
 from database import SessionLocal, engine
-from models import Base, Record
+from models import Base, Record, User
+from auth import hash_password
 
 load_dotenv()
 
@@ -30,6 +31,24 @@ ALBUM_IDS = [
 async def seed_database():
     db: Session = SessionLocal()
     print("--- Starting Database Seed ---")
+
+    admin_email = "admin@recordstore.com"
+    existing_admin = db.query(User).filter(User.email == admin_email).first()
+    
+    if not existing_admin:
+        print("Creating default admin user...")
+        admin_user = User(
+            username="admin",
+            email=admin_email,
+            hashed_password=hash_password("admin123"),
+            is_active=True,
+            is_admin=True
+        )
+        db.add(admin_user)
+        db.commit()
+        print("Admin user created: admin@recordstore.com / admin123")
+    else:
+        print("Admin user already exists.")
 
     async with httpx.AsyncClient() as client:
         for release_id in ALBUM_IDS:
