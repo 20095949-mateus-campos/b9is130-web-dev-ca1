@@ -142,6 +142,7 @@ def create_record(
     admin: models.User = Depends(get_current_admin)
 ):
     new_record = models.Record(
+        discogs_id=record_data.discogs_id,
         title=record_data.title,
         artist=record_data.artist,
         genre=record_data.genre,

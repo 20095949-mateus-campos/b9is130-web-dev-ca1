@@ -72,6 +72,7 @@ class CartAdd(BaseModel):
     quantity: int = 1
 
 class RecordCreate(BaseModel):
+    discogs_id: int
     title: str
     artist: str
     genre: Optional[str] = None
