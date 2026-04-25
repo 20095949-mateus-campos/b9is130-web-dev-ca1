@@ -1,4 +1,9 @@
-import { useEffect, useState } from 'react'
+import React from "react";
+import Navbar from "./components/Navbar";
+import Home from "./pages/Home";
+import RecordDetail from "./pages/RecordDetail";
+import { Routes, Route } from "react-router-dom";
+import Cart from "./pages/Cart";
 
 function App() {
   const [data, setData] = useState([])
@@ -10,13 +15,22 @@ function App() {
       .then(json => setData(json))
       .catch(err => console.error("API Error:", err))
   }, [API_URL])
-
+  
   return (
-    <div>
-      <h1>Music Store API Data:</h1>
-      <pre>{JSON.stringify(data, null, 2)}</pre>
+    <div className="min-h-screen flex flex-col">
+      {/* GLOBAL NAVBAR */}
+      <Navbar />
+
+      {/* MAIN CONTENT */}
+      <main className="flex-1 w-full">
+        <Routes>
+          <Route path="/" element={<Home />} />
+          <Route path="/record/:id" element={<RecordDetail />} />
+          <Route path="/cart" element={<Cart />} /> 
+        </Routes>
+      </main>
     </div>
-  )
+  );
 }
 
-export default App
+export default App;
