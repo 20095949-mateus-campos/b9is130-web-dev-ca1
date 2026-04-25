@@ -232,3 +232,43 @@ def delete_record(
     db.delete(record)
     db.commit()
     return {"message": "Record deleted from inventory"}
+
+@app.post("/cart/add")
+def add_to_cart(
+    data: schemas.CartAdd,
+    db: Session = Depends(get_db),
+    current_user: models.User = Depends(get_current_user)
+):
+    # 1. Check record exists
+    record = db.query(models.Record).filter(models.Record.id == data.record_id).first()
+    if not record:
+        raise HTTPException(status_code=404, detail="Record not found")
+
+    # 2. Get or create cart
+    cart = db.query(models.Cart).filter(models.Cart.user_id == current_user.id).first()
+    
+    if not cart:
+        cart = models.Cart(user_id=current_user.id)
+        db.add(cart)
+        db.commit()
+        db.refresh(cart)
+
+    # 3. Check if item already in cart
+    cart_item = db.query(models.CartItem).filter(
+        models.CartItem.cart_id == cart.id,
+        models.CartItem.record_id == data.record_id
+    ).first()
+
+    if cart_item:
+        cart_item.quantity += data.quantity
+    else:
+        cart_item = models.CartItem(
+            cart_id=cart.id,
+            record_id=data.record_id,
+            quantity=data.quantity
+        )
+        db.add(cart_item)
+
+    db.commit()
+
+    return {"message": "Item added to cart"}

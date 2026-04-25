@@ -68,3 +68,22 @@ class OrderItem(Base):
     @property
     def record_title(self):
         return self.record.title if self.record else None
+
+class Cart(Base):
+    __tablename__ = "carts"
+
+    id = Column(Integer, primary_key=True, index=True)
+    user_id = Column(Integer, ForeignKey("users.id"))
+
+    items = relationship("CartItem", back_populates="cart")
+
+class CartItem(Base):
+    __tablename__ = "cart_items"
+
+    id = Column(Integer, primary_key=True, index=True)
+    cart_id = Column(Integer, ForeignKey("carts.id"))
+    record_id = Column(Integer, ForeignKey("records.id"))
+    quantity = Column(Integer, default=1)
+
+    cart = relationship("Cart", back_populates="items")
+    record = relationship("Record")

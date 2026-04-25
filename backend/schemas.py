@@ -66,3 +66,7 @@ class OrderOut(BaseModel):
 class UserLogin(BaseModel):
     email: EmailStr
     password: str
+
+class CartAdd(BaseModel):
+    record_id: int
+    quantity: int = 1
