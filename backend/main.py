@@ -186,85 +186,6 @@ def delete_record(
     return {"message": "Record deleted from inventory"}
 
 
-# --------- Order Endpoints ---------
-@app.post("/orders", status_code=201)
-def create_order(
-    order_data: schemas.OrderCreate, 
-    db: Session = Depends(get_db),
-    current_user: models.User = Depends(get_current_user)
-):
-    total_price = 0
-    order_items = []
-    
-    for rid in order_data.record_ids:
-        record = db.query(models.Record).filter(models.Record.id == rid).first()
-        
-        if not record:
-            raise HTTPException(status_code=404, detail=f"Record ID {rid} not found")
-        if record.stock_quantity < 1:
-            raise HTTPException(status_code=400, detail=f"'{record.title}' is out of stock")
-        
-        record.stock_quantity -= 1
-        total_price += record.price
-        
-        item = models.OrderItem(
-            record_id=record.id,
-            unit_price=record.price,
-            quantity=1
-        )
-        order_items.append(item)
-
-    new_order = models.Order(
-        user_id=current_user.id,
-        total_price=total_price,
-        items=order_items
-    )
-    
-    try:
-        db.add(new_order)
-        db.commit()
-        db.refresh(new_order)
-        return {"message": "Order successful", "order_id": new_order.id, "total": total_price}
-    except Exception as e:
-        db.rollback()
-        print(f"DATABASE ERROR: {e}") 
-        raise HTTPException(status_code=500, detail="Could not process order")
-
-@app.get("/api/orders/my-history", response_model=List[schemas.OrderOut])
-def get_my_order_history(
-    db: Session = Depends(get_db), 
-    current_user: models.User = Depends(get_current_user)
-):
-    orders = db.query(models.Order).filter(models.Order.user_id == current_user.id).all()
-    return orders
-
-@app.post("/orders/{order_id}/cancel")
-def cancel_order(order_id: int, db: Session = Depends(get_db)):
-    order = db.query(models.Order).filter(models.Order.id == order_id).first()
-    
-    if not order:
-        raise HTTPException(status_code=404, detail="Order not found")
-    
-    if order.status == "cancelled":
-        raise HTTPException(status_code=400, detail="Order is already cancelled")
-
-    try:
-        for item in order.items:
-            record = db.query(models.Record).filter(models.Record.id == item.record_id).first()
-            if record:
-                record.stock_quantity += item.quantity
-        
-        order.status = "cancelled"
-        
-        db.commit()
-        return {"message": "Order cancelled and stock restored", "order_id": order_id}
-        
-    except Exception as e:
-        db.rollback()
-        print(f"CANCELLATION ERROR: {e}")
-        raise HTTPException(status_code=500, detail="Failed to cancel order")
-
-
 # --------- Cart Endpoints ---------
 @app.post("/cart/add")
 def add_to_cart(
@@ -369,3 +290,100 @@ def remove_from_cart(
     db.commit()
 
     return {"message": "Item removed from cart"}
+
+
+# --------- Order Endpoints ---------
+@app.post("/orders", status_code=201)
+def create_order(
+    order_data: schemas.OrderCreate, 
+    db: Session = Depends(get_db),
+    current_user: models.User = Depends(get_current_user)
+):
+    total_price = 0
+    order_items = []
+    
+    for rid in order_data.record_ids:
+        record = db.query(models.Record).filter(models.Record.id == rid).first()
+        
+        if not record:
+            raise HTTPException(status_code=404, detail=f"Record ID {rid} not found")
+        if record.stock_quantity < 1:
+            raise HTTPException(status_code=400, detail=f"'{record.title}' is out of stock")
+        
+        record.stock_quantity -= 1
+        total_price += record.price
+        
+        item = models.OrderItem(
+            record_id=record.id,
+            unit_price=record.price,
+            quantity=1
+        )
+        order_items.append(item)
+
+    new_order = models.Order(
+        user_id=current_user.id,
+        total_price=total_price,
+        items=order_items
+    )
+    
+    try:
+        db.add(new_order)
+        db.commit()
+        db.refresh(new_order)
+        return {"message": "Order successful", "order_id": new_order.id, "total": total_price}
+    except Exception as e:
+        db.rollback()
+        print(f"DATABASE ERROR: {e}") 
+        raise HTTPException(status_code=500, detail="Could not process order")
+
+@app.get("/api/orders/my-history", response_model=List[schemas.OrderOut])
+def get_my_order_history(
+    db: Session = Depends(get_db), 
+    current_user: models.User = Depends(get_current_user)
+):
+    orders = db.query(models.Order).filter(models.Order.user_id == current_user.id).all()
+    return orders
+
+@app.post("/orders/{order_id}/cancel")
+def cancel_order(order_id: int, db: Session = Depends(get_db)):
+    order = db.query(models.Order).filter(models.Order.id == order_id).first()
+    
+    if not order:
+        raise HTTPException(status_code=404, detail="Order not found")
+    
+    if order.status == "cancelled":
+        raise HTTPException(status_code=400, detail="Order is already cancelled")
+
+    try:
+        for item in order.items:
+            record = db.query(models.Record).filter(models.Record.id == item.record_id).first()
+            if record:
+                record.stock_quantity += item.quantity
+        
+        order.status = "cancelled"
+        
+        db.commit()
+        return {"message": "Order cancelled and stock restored", "order_id": order_id}
+        
+    except Exception as e:
+        db.rollback()
+        print(f"CANCELLATION ERROR: {e}")
+        raise HTTPException(status_code=500, detail="Failed to cancel order")
+
+@app.get("/orders/{order_id}", response_model=schemas.OrderOut)
+def get_order_details(
+    order_id: int,
+    db: Session = Depends(get_db),
+    current_user: models.User = Depends(get_current_user)
+):
+    #Get order
+    order = db.query(models.Order).filter(models.Order.id == order_id).first()
+
+    if not order:
+        raise HTTPException(status_code=404, detail="Order not found")
+
+    #Security check
+    if order.user_id != current_user.id:
+        raise HTTPException(status_code=403, detail="Not authorized to view this order")
+
+    return order
