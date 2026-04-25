@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, Float, DateTime, Text, Boolean, ForeignKey
+from sqlalchemy import Column, Integer, String, Numeric, DateTime, Text, Boolean, ForeignKey
 from sqlalchemy.sql import func
 from database import Base
 from sqlalchemy.orm import relationship
@@ -15,6 +15,7 @@ class User(Base):
     created_at = Column(DateTime(timezone=True), server_default=func.now())
 
     orders = relationship("Order", back_populates="user")
+    cart = relationship("Cart", uselist=False, backref="owner")
 
 class Record(Base):
     __tablename__ = "records"
@@ -29,7 +30,7 @@ class Record(Base):
     year = Column(Integer)
     cover_image = Column(String(500), nullable=True)
     
-    price = Column(Float, nullable=False)
+    price = Column(Numeric(10, 2), nullable=False)
     stock_quantity = Column(Integer, default=0)
     condition = Column(String(50))
     
@@ -45,7 +46,7 @@ class Order(Base):
 
     id = Column(Integer, primary_key=True, index=True)
     user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
-    total_price = Column(Float, nullable=False)
+    total_price = Column(Numeric(10, 2), nullable=False)
     status = Column(String(50), default="pending")
     created_at = Column(DateTime(timezone=True), server_default=func.now())
 
@@ -60,7 +61,7 @@ class OrderItem(Base):
     record_id = Column(Integer, ForeignKey("records.id"))
     
     quantity = Column(Integer, default=1)
-    unit_price = Column(Float, nullable=False) 
+    unit_price = Column(Numeric(10, 2), nullable=False) 
 
     order = relationship("Order", back_populates="items")
     record = relationship("Record")
