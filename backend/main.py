@@ -9,6 +9,7 @@ from fastapi.security import OAuth2PasswordRequestForm
 from discogs import get_discogs_metadata
 import os
 from dotenv import load_dotenv
+from decimal import Decimal
 
 load_dotenv()
 
@@ -40,8 +41,8 @@ def get_records(
     db: Session = Depends(get_db),
     search: Optional[str] = None,
     genre: Optional[str] = None,
-    min_price: Optional[float] = None,
-    max_price: Optional[float] = None
+    min_price: Optional[Decimal] = None,
+    max_price: Optional[Decimal] = None
 ):
     query = db.query(models.Record)
 
