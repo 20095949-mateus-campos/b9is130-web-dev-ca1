@@ -32,21 +32,23 @@ async def seed_database():
     db: Session = SessionLocal()
     print("--- Starting Database Seed ---")
 
-    admin_email = "admin@recordstore.com"
+    admin_email = os.getenv("ADMIN_EMAIL")
+    admin_pass = os.getenv("ADMIN_PASSWORD")
+    admin_user = os.getenv("ADMIN_USERNAME")
     existing_admin = db.query(User).filter(User.email == admin_email).first()
     
     if not existing_admin:
-        print("Creating default admin user...")
-        admin_user = User(
-            username="admin",
+        print(f"Seeding admin user: {admin_email}")
+        new_admin = User(
+            username=admin_user,
             email=admin_email,
-            hashed_password=hash_password("admin123"),
+            hashed_password=hash_password(admin_pass),
             is_active=True,
             is_admin=True
         )
-        db.add(admin_user)
+        db.add(new_admin)
         db.commit()
-        print("Admin user created: admin@recordstore.com / admin123")
+        print(f"Admin user created.")
     else:
         print("Admin user already exists.")
 
