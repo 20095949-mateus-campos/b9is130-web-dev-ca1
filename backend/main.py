@@ -81,7 +81,7 @@ def register_user(user_data: schemas.UserCreate, db: Session = Depends(get_db)):
     return new_user
 
 @app.get("/users/me")
-def read_users_me(current_user: models.User = Depends(get_current_user)):
+def get_current_user_info(current_user: models.User = Depends(get_current_user)):
     return current_user
 
 
@@ -113,7 +113,7 @@ def get_records(
     return query.all()
 
 @app.get("/records/{record_id}")
-async def get_record(record_id: int, db: Session = Depends(get_db)):
+async def get_record_by_id(record_id: int, db: Session = Depends(get_db)):
     record = db.query(models.Record).filter(models.Record.id == record_id).first()
     
     if not record:
