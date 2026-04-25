@@ -272,3 +272,26 @@ def add_to_cart(
     db.commit()
 
     return {"message": "Item added to cart"}
+
+@app.post("/admin/records", response_model=schemas.RecordSchema)
+def create_record(
+    record_data: schemas.RecordCreate,
+    db: Session = Depends(get_db),
+    admin: models.User = Depends(get_current_admin)
+):
+    new_record = models.Record(
+        title=record_data.title,
+        artist=record_data.artist,
+        genre=record_data.genre,
+        year=record_data.year,
+        cover_image=record_data.cover_image,
+        price=record_data.price,
+        stock_quantity=record_data.stock_quantity,
+        description=record_data.description
+    )
+
+    db.add(new_record)
+    db.commit()
+    db.refresh(new_record)
+
+    return new_record
