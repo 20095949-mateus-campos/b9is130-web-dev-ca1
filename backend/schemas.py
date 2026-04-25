@@ -90,7 +90,16 @@ class CartItemOut(BaseModel):
     class Config:
         from_attributes = True
 
-
 class CartOut(BaseModel):
     items: List[CartItemOut]
     total: float
+
+class UserListOut(BaseModel):
+    id: int
+    username: str
+    email: str
+    is_active: bool
+    is_admin: bool
+
+    class Config:
+        from_attributes = True
