@@ -92,6 +92,28 @@ def get_all_users(
     users = db.query(models.User).all()
     return users
 
+@app.patch("/users/me", response_model=schemas.UserOut)
+def update_user(
+    update_data: schemas.UserUpdate,
+    db: Session = Depends(get_db),
+    current_user: models.User = Depends(get_current_user)
+):
+    update_dict = update_data.model_dump(exclude_unset=True)
+
+    #Handle password separately
+    if "password" in update_dict:
+        update_dict["hashed_password"] = auth.hash_password(update_dict["password"])
+        del update_dict["password"]
+
+    # Update fields dynamically
+    for key, value in update_dict.items():
+        setattr(current_user, key, value)
+
+    db.commit()
+    db.refresh(current_user)
+
+    return current_user
+
 # --------- Records Endpoints ---------
 @app.get("/records", response_model=List[schemas.RecordSchema])
 def get_records(
@@ -201,12 +223,12 @@ def add_to_cart(
     db: Session = Depends(get_db),
     current_user: models.User = Depends(get_current_user)
 ):
-    # 1. Check record exists
+    #Check record exists
     record = db.query(models.Record).filter(models.Record.id == data.record_id).first()
     if not record:
         raise HTTPException(status_code=404, detail="Record not found")
 
-    # 2. Get or create cart
+    #Get or create cart
     cart = db.query(models.Cart).filter(models.Cart.user_id == current_user.id).first()
     
     if not cart:
@@ -215,7 +237,7 @@ def add_to_cart(
         db.commit()
         db.refresh(cart)
 
-    # 3. Check if item already in cart
+    #Check if item already in cart
     cart_item = db.query(models.CartItem).filter(
         models.CartItem.cart_id == cart.id,
         models.CartItem.record_id == data.record_id
@@ -250,7 +272,7 @@ def get_cart(
     items = []
     total = 0
 
-    # 2. Loop through cart items
+    #Loop through cart items
     for item in cart.items:
         record = item.record
 
