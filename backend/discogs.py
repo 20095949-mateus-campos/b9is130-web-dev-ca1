@@ -23,3 +23,15 @@ async def get_discogs_metadata(release_id: int):
         else:
             print(f"Error: {response.status_code}")
         return None
+
+async def search_discogs(release_title: str):
+    async with httpx.AsyncClient() as client:
+        response = await client.get(f"{BASE_URL}/database/search", headers=HEADERS, params={"q": release_title})
+        
+        if response.status_code == 200:
+            return response.json()
+        elif response.status_code == 404:
+            print(f"Release {release_title} not found.")
+        else:
+            print(f"Error: {response.status_code}")
+        return None
