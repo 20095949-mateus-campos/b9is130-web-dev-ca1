@@ -73,6 +73,7 @@ class CartAdd(BaseModel):
     quantity: int = 1
 
 class RecordCreate(BaseModel):
+    discogs_id: int
     title: str
     artist: str
     genre: Optional[str] = None
@@ -81,3 +82,31 @@ class RecordCreate(BaseModel):
     price: Decimal
     stock_quantity: int = 0
     description: Optional[str] = None
+
+class CartItemOut(BaseModel):
+    record_id: int
+    title: str
+    price: float
+    quantity: int
+
+    class Config:
+        from_attributes = True
+
+class CartOut(BaseModel):
+    items: List[CartItemOut]
+    total: float
+
+class UserListOut(BaseModel):
+    id: int
+    username: str
+    email: str
+    is_active: bool
+    is_admin: bool
+
+    class Config:
+        from_attributes = True
+
+class UserUpdate(BaseModel):
+    username: Optional[str] = None
+    email: Optional[EmailStr] = None
+    password: Optional[str] = None
