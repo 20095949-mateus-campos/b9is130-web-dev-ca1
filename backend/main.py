@@ -84,6 +84,13 @@ def register_user(user_data: schemas.UserCreate, db: Session = Depends(get_db)):
 def get_current_user_info(current_user: models.User = Depends(get_current_user)):
     return current_user
 
+@app.get("/admin/users", response_model=List[schemas.UserListOut])
+def get_all_users(
+    db: Session = Depends(get_db),
+    admin: models.User = Depends(get_current_admin)
+):
+    users = db.query(models.User).all()
+    return users
 
 # --------- Records Endpoints ---------
 @app.get("/records", response_model=List[schemas.RecordSchema])
