@@ -80,3 +80,17 @@ class RecordCreate(BaseModel):
     price: float
     stock_quantity: int = 0
     description: Optional[str] = None
+
+class CartItemOut(BaseModel):
+    record_id: int
+    title: str
+    price: float
+    quantity: int
+
+    class Config:
+        from_attributes = True
+
+
+class CartOut(BaseModel):
+    items: List[CartItemOut]
+    total: float
