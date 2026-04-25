@@ -311,6 +311,23 @@ def get_cart(
     items = []
     total = 0
 
+    # 2. Loop through cart items
+    for item in cart.items:
+        record = item.record
+
+        if not record:
+            continue
+
+        item_total = record.price * item.quantity
+        total += item_total
+
+        items.append({
+            "record_id": record.id,
+            "title": record.title,
+            "price": record.price,
+            "quantity": item.quantity
+        })
+
     return {
         "items": items,
         "total": total
