@@ -295,3 +295,23 @@ def create_record(
     db.refresh(new_record)
 
     return new_record
+
+@app.get("/cart", response_model=schemas.CartOut)
+def get_cart(
+    db: Session = Depends(get_db),
+    current_user: models.User = Depends(get_current_user)
+):
+    #Get user's cart
+    cart = db.query(models.Cart).filter(models.Cart.user_id == current_user.id).first()
+
+    # If no cart → return empty
+    if not cart:
+        return {"items": [], "total": 0}
+
+    items = []
+    total = 0
+
+    return {
+        "items": items,
+        "total": total
+    }
