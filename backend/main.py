@@ -344,7 +344,7 @@ def get_cart(
     }
 
 @app.delete("/cart/remove/{record_id}")
-def remove_item_from_cart(
+def remove_from_cart(
     record_id: int,
     db: Session = Depends(get_db),
     current_user: models.User = Depends(get_current_user)
@@ -354,3 +354,18 @@ def remove_item_from_cart(
 
     if not cart:
         raise HTTPException(status_code=404, detail="Cart not found")
+
+    #Find cart item
+    cart_item = db.query(models.CartItem).filter(
+        models.CartItem.cart_id == cart.id,
+        models.CartItem.record_id == record_id
+    ).first()
+
+    if not cart_item:
+        raise HTTPException(status_code=404, detail="Item not found in cart")
+
+    #Delete item
+    db.delete(cart_item)
+    db.commit()
+
+    return {"message": "Item removed from cart"}
