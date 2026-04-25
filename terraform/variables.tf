@@ -15,6 +15,23 @@ variable "db_password" {
   sensitive   = true
 }
 
+variable "duckdns_domain" {
+  description = "DuckDNS domain name"
+  type        = string
+}
+
+variable "duckdns_token" {
+  description = "DuckDNS token"
+  type        = string
+  sensitive   = true
+}
+
+variable "github_token" {
+  description = "GitHub Personal Access Token"
+  type        = string
+  sensitive   = true
+}
+
 data "http" "my_public_ip" {
   url = "https://icanhazip.com/"
 }

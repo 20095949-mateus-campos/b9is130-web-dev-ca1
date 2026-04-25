@@ -66,3 +66,17 @@ class OrderOut(BaseModel):
 class UserLogin(BaseModel):
     email: EmailStr
     password: str
+
+class CartAdd(BaseModel):
+    record_id: int
+    quantity: int = 1
+
+class RecordCreate(BaseModel):
+    title: str
+    artist: str
+    genre: Optional[str] = None
+    year: Optional[int] = None
+    cover_image: Optional[str] = None
+    price: float
+    stock_quantity: int = 0
+    description: Optional[str] = None

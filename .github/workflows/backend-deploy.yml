@@ -1,0 +1,102 @@
+name: Backend Deployment
+
+on:
+  push:
+    branches: [ "main" ]
+    paths:
+      - 'backend/**'
+  workflow_dispatch:
+    inputs:
+      reseed:
+        description: 'Check to re-run database seeding'
+        required: false
+        type: boolean
+        default: false
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+    outputs:
+      registry_url: ${{ steps.login-ecr.outputs.registry }}
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: eu-west-1
+
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Build and Push Docker Image
+        env:
+          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          ECR_REPOSITORY: record-store-backend
+          IMAGE_TAG: latest
+        run: |
+          docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG ./backend
+          docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
+  deploy:
+    needs: build-and-push
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Copy Nginx config to EC2
+        run: |
+          echo "${{ secrets.EC2_SSH_KEY }}" > private_key.pem
+          chmod 600 private_key.pem
+          scp -i private_key.pem -o StrictHostKeyChecking=no ${{ github.workspace }}/backend/nginx.conf ubuntu@${{ secrets.EC2_HOST }}:/home/ubuntu/nginx.conf
+
+      - name: Deploy to EC2 via SSH
+        uses: appleboy/ssh-action@v1.0.3
+        env:
+          REGISTRY_URL: ${{ needs.build-and-push.outputs.registry_url }}
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ubuntu
+          key: ${{ secrets.EC2_SSH_KEY }}
+          envs: REGISTRY_URL
+          script: |
+            export AWS_ACCESS_KEY_ID=${{ secrets.AWS_ACCESS_KEY_ID }}
+            export AWS_SECRET_ACCESS_KEY=${{ secrets.AWS_SECRET_ACCESS_KEY }}
+            export AWS_DEFAULT_REGION=eu-west-1
+
+            aws ecr get-login-password --region eu-west-1 | sudo docker login --username AWS --password-stdin $REGISTRY_URL
+
+            sudo docker pull $REGISTRY_URL/record-store-backend:latest
+            sudo docker stop music-api || true
+            sudo docker rm music-api || true
+
+            sudo docker run -d --name music-api \
+              -p 8000:8000 \
+              -e ADMIN_EMAIL=${{ secrets.ADMIN_EMAIL }} \
+              -e ADMIN_PASSWORD=${{ secrets.ADMIN_PASSWORD }} \
+              -e ADMIN_USERNAME=${{ secrets.ADMIN_USERNAME }} \
+              -e DB_HOST=${{ secrets.DB_HOST }} \
+              -e DB_USER=${{ secrets.DB_USER }} \
+              -e DB_PASSWORD=${{ secrets.DB_PASSWORD }} \
+              -e DB_NAME=${{ secrets.DB_NAME }} \
+              -e DB_PORT=${{ secrets.DB_PORT }} \
+              -e FRONTEND_URL="${{ secrets.CLOUDFRONT_DOMAIN }}" \
+              --restart always $REGISTRY_URL/record-store-backend:latest
+
+            sed -i "s/\${DOMAIN_NAME}/${{ secrets.DOMAIN_NAME }}/g" /home/ubuntu/nginx.conf
+            sudo cp /home/ubuntu/nginx.conf /etc/nginx/sites-available/music-api
+            sudo ln -sf /etc/nginx/sites-available/music-api /etc/nginx/sites-enabled/music-api
+            sudo rm /etc/nginx/sites-enabled/default
+            sudo nginx -t && sudo systemctl restart nginx
+
+            if [ ! -d "/etc/letsencrypt/live/${{ secrets.DOMAIN_NAME }}" ]; then
+              sudo certbot --nginx -d ${{ secrets.DOMAIN_NAME }} --non-interactive --agree-tos -m ${{ secrets.EMAIL }} --staging
+            else
+              sudo nginx -t && sudo systemctl restart nginx
+            fi
+
+            sudo docker exec -e RESEED=${{ github.event.inputs.reseed || 'false' }} music-api python3 migrate.py
