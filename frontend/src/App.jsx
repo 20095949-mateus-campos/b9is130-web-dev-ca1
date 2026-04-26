@@ -1,13 +1,17 @@
 import React, { useState, useEffect } from "react";
 import { Routes, Route } from "react-router-dom";
+
 import Navbar from "./components/Navbar";
 import Home from "./pages/Home";
 import RecordDetail from "./pages/RecordDetail";
 import Cart from "./pages/Cart";
 import Wishlist from "./pages/Whishlist";
+import Auth from "./pages/Auth";
+import Profile from "./pages/Profile";
+import MyOrders from "./pages/MyOrders";
+import OrderDetails from "./pages/OrderDetails";
 
 function App() {
-
   const [data, setData] = useState([]);
   const API_URL = import.meta.env.VITE_API_URL || "http://localhost:8000";
 
@@ -29,6 +33,10 @@ function App() {
           <Route path="/record/:id" element={<RecordDetail />} />
           <Route path="/cart" element={<Cart />} /> 
           <Route path="/wishlist" element={<Wishlist />} />
+          <Route path="/auth" element={<Auth />} />
+          <Route path="/profile" element={<Profile />} />
+          <Route path="/orders" element={<MyOrders />} />
+          <Route path="/orders/:id" element={<OrderDetails />} />
         </Routes>
       </main>
     </div>
