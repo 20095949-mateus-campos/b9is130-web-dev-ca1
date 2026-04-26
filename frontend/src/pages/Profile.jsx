@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { getCurrentUser } from "../services/api";
+import { getCurrentUser, logoutUser } from "../services/api";
 
 function Profile() {
     const navigate = useNavigate();
@@ -28,6 +28,12 @@ function Profile() {
 
         loadUser();
     }, []);
+
+    const handleLogout = () => {
+        logoutUser();
+        
+        window.location.href = "/auth"; 
+    };
 
     if (loading) {
         return (
@@ -68,6 +74,14 @@ function Profile() {
                     <p>{user.email}</p>
 
                     <span className="status-badge">Active {user.role}</span>
+
+                    <br></br>
+                    <button 
+                        onClick={handleLogout}
+                        className="secondary-btn"
+                    >
+                        Log Out
+                    </button>
                 </div>
 
                 <div className="profile-card">

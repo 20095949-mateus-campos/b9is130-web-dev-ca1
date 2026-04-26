@@ -23,7 +23,7 @@ function Auth() {
         try {
             if (mode === "signin") {
                 await loginUser(email, password);
-                navigate("/profile");
+                window.location.href = "/";
             } else {
                 await registerUser(username, email, password);
                 setMessage("Account created. Please sign in.");
