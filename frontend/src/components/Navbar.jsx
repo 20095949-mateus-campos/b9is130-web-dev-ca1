@@ -70,9 +70,8 @@ console.log("first item:", cart?.items?.[0]);
             </Link>
 
             <button onClick={() => setWishlistOpen(true)} className="nav-icon">
-            <Link to="/wishlist" className="nav-icon">
               <FiHeart />
-            </Link>
+            </button>
 
             <Link
               to="/cart"
