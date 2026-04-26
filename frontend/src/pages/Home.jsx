@@ -28,16 +28,15 @@ function Home() {
   };
 
   return (
-    <div className="min-h-screen bg-[var(--color-bg)]">
+    <div className="min-h-screen bg-[var(--color-bg)] pt-[5px]">
       {/* TITLE */}
-      <div className="max-w-6xl mx-auto px-[1.5rem] mb-10">
-        <h1 className="text-[3rem] font-semibold text-gray-900">
+        <h1 className="text-[2.5rem] font-semibold px-[2.5rem]">
           Featured Records
         </h1>
-      </div>
+        <div className="w-[10rem] h-[3px] bg-[var(--color-accent)] mb-6 rounded-full mb-[1rem] mx-[2.5rem]" />
 
       {/* SCROLL SECTION */}
-      <div className="max-w-6xl mx-auto relative group">
+      <div className="relative group">
         {/* LEFT */}
         <button
           onClick={() => scroll("left")}

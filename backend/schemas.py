@@ -81,13 +81,12 @@ class RecordCreate(BaseModel):
     description: Optional[str] = None
 
 class CartItemOut(BaseModel):
-    record_id: int
+    id: int
     title: str
     price: float
     quantity: int
-
-    class Config:
-        from_attributes = True
+    cover_image: str | None = None
+    description: str | None = None
 
 class CartOut(BaseModel):
     items: List[CartItemOut]
