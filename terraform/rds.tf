@@ -19,6 +19,11 @@ resource "github_actions_secret" "db_host" {
   repository      = "b9is130-web-dev-ca1"
   secret_name     = "DB_HOST"
   value = aws_db_instance.mysql_db.address 
+
+
+  lifecycle {
+    prevent_destroy = true
+  }
 }
 
 output "rds_endpoint" {
