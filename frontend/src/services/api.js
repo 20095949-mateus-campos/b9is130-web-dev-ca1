@@ -91,18 +91,8 @@ export function logoutUser() {
     localStorage.removeItem("token");
 }
 
-export async function getRecords(genre = "", search = "") {
-    let url = `${API_BASE_URL}/records`;
-
-    const params = new URLSearchParams();
-    if (genre) params.append("genre", genre);
-    if (search) params.append("search", search);
-
-    if (params.toString()) {
-        url += `?${params.toString()}`;
-    }
-
-    const response = await fetch(url);
+export async function getRecords() {
+    const response = await fetch(`${API_BASE_URL}/records`);
 
     if (!response.ok) {
         throw new Error("Failed to fetch records");
@@ -111,19 +101,35 @@ export async function getRecords(genre = "", search = "") {
     return await response.json();
 }
 
-export const addToCartAPI = async (data, token) => {
-  const res = await fetch("http://localhost:8000/cart/add", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${token}`, // REQUIRED (your backend uses auth)
-    },
-    body: JSON.stringify(data),
+// Get wishlist
+export async function getWishlist() {
+  const response = await fetch(`${API_BASE_URL}/wishlist`, {
+    headers: authHeaders(),
   });
 
-  if (!res.ok) {
-    throw new Error("Failed to add to cart");
-  }
+  return handleResponse(response, "Failed to fetch wishlist");
+}
 
-  return res.json();
-};
+// Add to wishlist
+export async function addToWishlistAPI(recordId) {
+  const response = await fetch(`${API_BASE_URL}/wishlist/${recordId}`, {
+    method: "POST",
+    headers: {
+      ...authHeaders(),
+    },
+  });
+
+  return handleResponse(response, "Failed to add to wishlist");
+}
+
+// Remove from wishlist
+export async function removeFromWishlistAPI(recordId) {
+  const response = await fetch(`${API_BASE_URL}/wishlist/${recordId}`, {
+    method: "DELETE",
+    headers: {
+      ...authHeaders(),
+    },
+  });
+
+  return handleResponse(response, "Failed to remove from wishlist");
+}

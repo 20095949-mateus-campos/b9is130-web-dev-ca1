@@ -3,6 +3,7 @@ import { useState, useEffect } from "react";
 import { FaRegHeart } from "react-icons/fa";
 import { getRecords } from "../services/api";
 import { useCart } from "../context/CartContext.jsx";
+import { addToWishlistAPI, removeFromWishlistAPI, getWishlist } from "../services/api";
 
 function RecordDetail() {
   const { id } = useParams();
@@ -12,6 +13,7 @@ function RecordDetail() {
   const [quantity, setQuantity] = useState(1);
   const [loadingCart, setLoadingCart] = useState(false);
   const [error, setError] = useState("");
+  const [isWishlisted, setIsWishlisted] = useState(false);
 
   const { addToCart } = useCart();
 
@@ -22,6 +24,20 @@ function RecordDetail() {
       setRecord(found);
     };
     fetchData();
+  }, [id]);
+
+  useEffect(() => {
+    const fetchWishlist = async () => {
+      try {
+        const data = await getWishlist();
+        const exists = data.find((item) => item.id === Number(id));
+        if (exists) setIsWishlisted(true);
+      } catch (err) {
+        console.error(err);
+      }
+    };
+
+    fetchWishlist();
   }, [id]);
 
   if (!record) return <div className="p-10">Loading...</div>;
@@ -46,6 +62,20 @@ function RecordDetail() {
       setError("Failed to add item to cart");
     } finally {
       setLoadingCart(false);
+    }
+  };
+
+  const handleWishlist = async () => {
+    try {
+      if (isWishlisted) {
+        await removeFromWishlistAPI(record.id);
+        setIsWishlisted(false);
+      } else {
+        await addToWishlistAPI(record.id);
+        setIsWishlisted(true);
+      }
+    } catch (err) {
+      alert(err.message);
     }
   };
 
@@ -135,9 +165,10 @@ function RecordDetail() {
                         border border-[var(--color-accent)] gap-[5px]
                         text-[var(--color-text)] px-[2rem] py-[10px]
                         cursor-pointer outline-none"
+                        onClick={handleWishlist}
             >
               <FaRegHeart />
-              <span>WISHLIST</span>
+              <span>{isWishlisted ? "REMOVE FROM WISHLIST" : "ADD TO WISHLIST"}</span>
             </button>
           </div>
 
