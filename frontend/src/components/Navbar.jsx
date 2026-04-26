@@ -70,10 +70,10 @@ const Navbar = () => {
 
           {/* ICONS */}
           <div className="flex items-center gap-4">
-
-            <button className="nav-icon">
+        
+            <Link to="/auth" className="nav-icon">
               <FiUser />
-            </button>
+            </Link>
 
             {/* Wishlist Toggle Button */}
             <button
@@ -96,13 +96,26 @@ const Navbar = () => {
           </div>
         </div>
 
-        {/* Quick Nav (The sub-menu from Version B) */}
-        <div className="flex justify-center gap-12 pb-4 text-sm border-t border-gray-100 pt-4">
-          <Link to="/" className="hover:underline">Home</Link>
-          <Link to="/auth" className="hover:underline">Account</Link>
-          <Link to="/profile" className="hover:underline">Profile</Link>
-          <Link to="/orders" className="hover:underline">My Orders</Link>
-        </div>
+        {/* Quick Nav */}
+          <div className="flex justify-center gap-8 pb-4 pt-4 border-t border-gray-200 text-sm font-medium">
+            
+            <Link to="/" className="text-gray-600 hover:text-black transition">
+              Home
+            </Link>
+
+            <Link to="/auth" className="text-gray-600 hover:text-black transition">
+              Account
+            </Link>
+
+            <Link to="/profile" className="text-gray-600 hover:text-black transition">
+              Profile
+            </Link>
+
+            <Link to="/orders" className="text-gray-600 hover:text-black transition">
+              My Orders
+            </Link>
+
+          </div>
       </nav>
 
       {/* Sidebar Drawer Logic */}
