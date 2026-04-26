@@ -257,9 +257,12 @@ async def search_external_records(
     admin: models.User = Depends(get_current_admin)
 ):
     results = await search_discogs(q)
+
+    records = results.get("results", [])
+
     if not results:
         return {"results": []}
-    return results.get("results", [])
+    return {"results": records[1:]}
 
 @app.post("/admin/records/import/{discogs_id}", response_model=schemas.RecordSchema)
 async def import_record_from_discogs(

@@ -91,8 +91,12 @@ export function logoutUser() {
     localStorage.removeItem("token");
 }
 
-export async function getRecords() {
-    const response = await fetch(`${API_BASE_URL}/records`);
+export async function getRecords(searchQuery = "") {
+    const url = searchQuery 
+        ? `${API_BASE_URL}/records?search=${encodeURIComponent(searchQuery)}`
+        : `${API_BASE_URL}/records`;
+    
+    const response = await fetch(`${url}`);
 
     if (!response.ok) {
         throw new Error("Failed to fetch records");
@@ -146,4 +150,31 @@ export async function checkoutOrder(checkoutData) {
     });
 
     return handleResponse(response, "Checkout failed");
+}
+
+export async function updateRecord(recordId, updateData) {
+  const response = await fetch(`${API_BASE_URL}/records/${recordId}`, {
+    method: "PATCH",
+    headers: getAuthHeaders(),
+    body: JSON.stringify(updateData),
+  });
+
+  if (!response.ok) {
+    const error = await response.json();
+    throw new Error(error.detail || "Failed to update record");
+  }
+  return await response.json();
+}
+
+export async function deleteRecord(recordId) {
+  const response = await fetch(`${API_BASE_URL}/records/${recordId}`, {
+    method: "DELETE",
+    headers: getAuthHeaders(),
+  });
+
+  if (!response.ok) {
+    const error = await response.json();
+    throw new Error(error.detail || "Failed to delete record");
+  }
+  return true;
 }

@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { getCurrentUser } from "../services/api";
+import { getCurrentUser, logoutUser } from "../services/api";
 
 function Profile() {
     const navigate = useNavigate();
@@ -28,6 +28,12 @@ function Profile() {
 
         loadUser();
     }, []);
+
+    const handleLogout = () => {
+        logoutUser();
+        
+        window.location.href = "/auth"; 
+    };
 
     if (loading) {
         return (
@@ -68,6 +74,14 @@ function Profile() {
                     <p>{user.email}</p>
 
                     <span className="status-badge">Active {user.role}</span>
+
+                    <br></br>
+                    <button 
+                        onClick={handleLogout}
+                        className="secondary-btn"
+                    >
+                        Log Out
+                    </button>
                 </div>
 
                 <div className="profile-card">
@@ -99,6 +113,19 @@ function Profile() {
 
                     <button className="secondary-btn">Add Address</button>
                 </div>
+
+                {user.role === "Admin" && (
+                    <div className="profile-card border-accent border-2">
+                        <h2>Inventory Control</h2>
+                        <p className="muted-text">Import new records from Discogs or manage stock.</p>
+                        <button 
+                            className="secondary-btn"
+                            onClick={() => navigate("/admin/catalog")}
+                        >
+                            Manage Catalog
+                        </button>
+                    </div>
+                )}
             </div>
         </section>
     );
