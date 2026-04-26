@@ -49,6 +49,9 @@ def login(form_data: OAuth2PasswordRequestForm = Depends(), db: Session = Depend
             detail="Invalid credentials"
         )
 
+    if user.is_deleted:
+        raise HTTPException(status_code=400, detail="This account has been deactivated.")
+
     access_token = auth.create_access_token(data={"user_id": user.id})
     
     return {"access_token": access_token, "token_type": "bearer"}
@@ -116,6 +119,27 @@ def update_user(
 
     return current_user
 
+@app.delete("/users/{user_id}", status_code=status.HTTP_200_OK)
+def soft_delete_user(
+    user_id: int, 
+    db: Session = Depends(get_db), 
+    current_user: models.User = Depends(get_current_user)
+):
+    user = db.query(models.User).filter(models.User.id == user_id).first()
+
+    if not user or user.is_deleted:
+        raise HTTPException(status_code=404, detail="User not found")
+
+    if current_user.id != user_id and not current_user.is_admin:
+        raise HTTPException(status_code=403, detail="Not authorized")
+
+    user.is_deleted = True
+    user.is_active = False
+    
+    user.email = f"deleted_{user.id}_{user.email}"
+    
+    db.commit()
+    return {"message": "Account deactivated successfully"}
 
 # --------- Records Endpoints ---------
 @app.get("/records", response_model=List[schemas.RecordSchema])
