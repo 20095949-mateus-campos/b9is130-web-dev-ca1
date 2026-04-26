@@ -88,27 +88,6 @@ console.log("first item:", cart?.items?.[0]);
             </Link>
           </div>
         </div>
-
-        {/* Quick Nav */}
-          <div className="flex justify-center gap-8 pb-4 pt-4 border-t border-gray-200 text-sm font-medium">
-            
-            <Link to="/" className="text-gray-600 hover:text-black transition">
-              Home
-            </Link>
-
-            <Link to="/auth" className="text-gray-600 hover:text-black transition">
-              Account
-            </Link>
-
-            <Link to="/profile" className="text-gray-600 hover:text-black transition">
-              Profile
-            </Link>
-
-            <Link to="/orders" className="text-gray-600 hover:text-black transition">
-              My Orders
-            </Link>
-
-          </div>
       </nav>
 
       <WishlistSidebar

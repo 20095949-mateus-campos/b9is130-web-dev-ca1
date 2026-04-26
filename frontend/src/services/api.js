@@ -39,8 +39,15 @@ export async function loginUser(email, password) {
         body: formData,
     });
 
-    const data = await handleResponse(response, "Invalid email or password");
+    if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.detail || "Login failed");
+    }
+
+    const data = await response.json();
+
     localStorage.setItem("token", data.access_token);
+
     return data;
 }
 
@@ -93,6 +100,12 @@ export async function getRecords(genre = "", search = "") {
 
     if (params.toString()) {
         url += `?${params.toString()}`;
+    }
+
+    const response = await fetch(url);
+
+    if (!response.ok) {
+        throw new Error("Failed to fetch records");
     }
 
     return await response.json();
