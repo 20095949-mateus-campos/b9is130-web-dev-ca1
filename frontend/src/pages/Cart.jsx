@@ -2,23 +2,23 @@ import { Link, useNavigate } from "react-router-dom";
 import { useCart } from "../context/CartContext";
 import { FaArrowLeft } from "react-icons/fa";
 import { RiDeleteBin6Line } from "react-icons/ri";
-import { useState } from "react";
 
 function Cart() {
   const { cart, updateQuantity, removeFromCart } = useCart();
-  const [showConfirm, setShowConfirm] = useState(false);
-  const [selectedItemId, setSelectedItemId] = useState(null);
   const navigate = useNavigate();
-
   const total = cart?.total || 0;
 
   return (
     <>
       <div className="max-w-6xl mx-auto p-8 bg-[var(--color-bg)]">
-        <Link to="/" className="flex items-center gap-[10px] mx-[10rem] mt-[10px]
-                                no-underline hover:opacity-70 transition duration-200 cursor-pointer">
+        <Link
+          to="/"
+          className="flex items-center gap-[10px] mx-[10rem] mt-[10px]
+                                no-underline hover:opacity-70 transition duration-200 cursor-pointer"
+        >
           <FaArrowLeft /> Home
         </Link>
+
         <h1 className="text-[2rem] font-semibold mx-[10rem]">Your cart</h1>
 
         <div className="grid grid-cols-[2fr_1fr_0.7fr] border-b mx-[10rem] py-[15px] text-[15px]">
@@ -32,8 +32,11 @@ function Cart() {
             <p className="text-[18px] font-[600] mb-[1rem]">
               Your cart is empty
             </p>
-            <Link to="/" className="underline">
-              Continue shopping
+            <Link
+              to="/"
+              className="text-[20px] underline hover:opacity-70 transition duration-200 cursor-pointer"
+            >
+              Start shopping
             </Link>
           </div>
         ) : (
@@ -48,8 +51,12 @@ function Cart() {
                   className="w-[140px] aspect-square object-cover"
                 />
                 <div>
-                  <p className="font-[700] mx-[25px] mt-[20px]">{item.title}</p>
-                  <p className="text-[15px] mx-[25px]">{item.description}</p>
+                  <p className="font-[700] mx-[25px] mt-[20px]">
+                    {item.title}
+                  </p>
+                  <p className="text-[15px] mx-[25px]">
+                    {item.description}
+                  </p>
                 </div>
               </div>
 
@@ -83,9 +90,19 @@ function Cart() {
 
                 <button
                   className=" mx-[15px] bg-transparent border-none outline-none cursor-pointer"
-                  onClick={() => {
-                    setSelectedItemId(item.id);
-                    setShowConfirm(true);
+                  onClick={async () => {
+                    const confirmDelete = window.confirm(
+                      "Are you sure you want to remove this product?"
+                    );
+
+                    if (!confirmDelete) return;
+
+                    try {
+                      await removeFromCart(item.id);
+                      alert("Item removed from cart");
+                    } catch (err) {
+                      alert("Failed to remove item");
+                    }
                   }}
                 >
                   <RiDeleteBin6Line className="text-[#c91414] text-[20px]" />
@@ -100,43 +117,14 @@ function Cart() {
         )}
 
         <div className="mx-[10rem] mt-[10px] flex justify-end">
-          <button onClick={() => navigate("/checkout")}
-                  className="bg-[var(--color-primary)] text-[var(--color-text-bright)] px-[2rem] py-[1rem]">
+          <button
+            onClick={() => navigate("/checkout")}
+            className="bg-[var(--color-primary)] text-[var(--color-text-bright)] px-[2rem] py-[1rem] cursor-pointer"
+          >
             CHECKOUT • €{total.toFixed(2)}
           </button>
         </div>
       </div>
-
-      {showConfirm && (
-        <div className="fixed top-0 left-0 w-full h-full bg-black/50 flex items-center justify-center z-[9999]">
-          <div className="bg-[var(--color-secondary)] p-8 rounded-[8px] w-[400px] text-center">
-            <p className="text-[16px] font-[600] mb-[15px]">
-              Are you sure you want to remove this product?
-            </p>
-
-            <div className="flex justify-center gap-4">
-              <button
-                className="bg-black text-white px-[1.5rem] py-[0.5rem]"
-                onClick={() => {
-                  if (selectedItemId !== null) {
-                    removeFromCart(selectedItemId);
-                  }
-                  setShowConfirm(false);
-                }}
-              >
-                Yes
-              </button>
-
-              <button
-                className="border px-[1.5rem] py-[0.5rem]"
-                onClick={() => setShowConfirm(false)}
-              >
-                No
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
     </>
   );
 }

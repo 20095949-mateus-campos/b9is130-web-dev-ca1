@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { FiUser, FiHeart, FiShoppingCart, FiSearch } from "react-icons/fi";
 import { Link } from "react-router-dom";
 import WishlistSidebar from "./WishlistSidebar";
@@ -6,9 +6,23 @@ import { useCart } from "../context/CartContext";
 
 const Navbar = () => {
   const [wishlistOpen, setWishlistOpen] = useState(false);
+  const [userOpen, setUserOpen] = useState(false);
+  const userRef = useRef(null);
+  const token = localStorage.getItem("token");
+  const isLoggedIn = !!token;
   const { cart } = useCart();
-
   const [animate, setAnimate] = useState(false);
+
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (userRef.current && !userRef.current.contains(e.target)) {
+        setUserOpen(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
 
   useEffect(() => {
     if (cart.length === 0) return;
@@ -24,12 +38,10 @@ const Navbar = () => {
     return () => window.removeEventListener("keydown", handleEsc);
   }, [wishlistOpen]);
 
-  const cartCount = cart?.items?.reduce(
-  (sum, item) => sum + (item.quantity || 1),
-  0
-) || 0;
-console.log("items:", cart?.items);
-console.log("first item:", cart?.items?.[0]);
+  const cartCount =
+    cart?.items?.reduce((sum, item) => sum + (item.quantity || 1), 0) || 0;
+  console.log("items:", cart?.items);
+  console.log("first item:", cart?.items?.[0]);
 
   return (
     <>
@@ -65,9 +77,55 @@ console.log("first item:", cart?.items?.[0]);
           </div>
 
           <div className="flex items-center gap-4">
-            <Link to="/auth" className="nav-icon">
-              <FiUser />
-            </Link>
+            <div className="relative" ref={userRef}>
+              <button
+                onClick={() => setUserOpen(!userOpen)}
+                className="nav-icon"
+              >
+                <FiUser />
+              </button>
+
+              {userOpen && (
+                <div className="absolute right-0 mt-[0.5rem] w-[160px] bg-[var(--color-primary)] border rounded-[6px] shadow-md z-[100]">
+                  {isLoggedIn ? (
+                    <>
+                      <Link
+                        to="/auth"
+                        className="block px-[1rem] py-[0.6rem] text-sm hover:underline no-underline text-[var(--color-text-bright)]"
+                        onClick={() => setUserOpen(false)}
+                      >
+                        My Account
+                      </Link>
+                      <Link
+                        to="/orders"
+                        className="block px-[1rem] py-[0.6rem] text-sm hover:underline no-underline text-[var(--color-text-bright)] no-underline"
+                        onClick={() => setUserOpen(false)}
+                      >
+                        My Orders
+                      </Link>
+                    </>
+                  ) : (
+                    <>
+                      <Link
+                        to="/auth"
+                        className="block px-[1rem] py-[0.6rem] text-sm hover:underline no-underline text-[var(--color-text-bright)]"
+                        onClick={() => setUserOpen(false)}
+                      >
+                        Login
+                      </Link>
+
+                      <Link
+                        to="/auth"
+                        className="block px-[1rem] py-[0.6rem] text-sm hover:underline no-underline text-[var(--color-text-bright)]"
+                        onClick={() => setUserOpen(false)}
+                      >
+                        Sign Up
+                      </Link>
+                    </>
+                  )}
+                </div>
+              )}
+            </div>
 
             <button onClick={() => setWishlistOpen(true)} className="nav-icon">
               <FiHeart />
@@ -84,7 +142,6 @@ console.log("first item:", cart?.items?.[0]);
                   {cartCount}
                 </span>
               )}
-              
             </Link>
           </div>
         </div>
