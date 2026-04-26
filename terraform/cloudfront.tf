@@ -47,21 +47,12 @@ resource "github_actions_secret" "cloudfront_id" {
   repository      = "b9is130-web-dev-ca1"
   secret_name     = "CLOUDFRONT_DISTRIBUTION_ID"
   value = aws_cloudfront_distribution.frontend_cdn.id
-  
-  lifecycle {
-    prevent_destroy = true
-  }
 }
 
 resource "github_actions_secret" "cloudfront_domain" {
   repository      = "b9is130-web-dev-ca1"
   secret_name     = "CLOUDFRONT_DOMAIN"
   value = "https://${aws_cloudfront_distribution.frontend_cdn.domain_name}"
-
-
-  lifecycle {
-    prevent_destroy = true
-  }
 }
 
 output "cloudfront_id" {
