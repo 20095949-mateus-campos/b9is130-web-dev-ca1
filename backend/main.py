@@ -435,74 +435,81 @@ def checkout(
     db: Session = Depends(get_db),
     current_user: models.User = Depends(get_current_user)
 ):
-    #Get user's cart
-    cart = db.query(models.Cart).filter(models.Cart.user_id == current_user.id).first()
+    cart = db.query(models.Cart).filter(
+        models.Cart.user_id == current_user.id
+    ).first()
 
     if not cart or not cart.items:
         raise HTTPException(status_code=400, detail="Cart is empty")
 
-    #payment validation
-    if len(data.card_number) < 8:
+    # Basic validation
+    if not data.address.strip():
+        raise HTTPException(status_code=400, detail="Address is required")
+
+    if not data.card_number.isdigit() or not (13 <= len(data.card_number) <= 19):
         raise HTTPException(status_code=400, detail="Invalid card number")
 
     total_price = 0
     order_items = []
 
-    #Process cart items
-    for item in cart.items:
-        record = db.query(models.Record).filter(models.Record.id == item.record_id).first()
+    try:
+        # Process items safely
+        for item in cart.items:
+            record = db.query(models.Record).filter(
+                models.Record.id == item.record_id
+            ).with_for_update().first()  
+            if not record:
+                raise HTTPException(status_code=404, detail=f"Record {item.record_id} not found")
 
-        if not record:
-            raise HTTPException(status_code=404, detail=f"Record ID {item.record_id} not found")
+            if record.stock_quantity < item.quantity:
+                raise HTTPException(
+                    status_code=400,
+                    detail=f"{record.title} out of stock"
+                )
 
-        if record.stock_quantity < item.quantity:
-            raise HTTPException(
-                status_code=400,
-                detail=f"'{record.title}' does not have enough stock"
+            record.stock_quantity -= item.quantity
+
+            item_total = record.price * item.quantity
+            total_price += item_total
+
+            order_items.append(
+                models.OrderItem(
+                    record_id=record.id,
+                    unit_price=record.price,
+                    quantity=item.quantity
+                )
             )
 
-        # Deduct stock
-        record.stock_quantity -= item.quantity
-
-        item_total = record.price * item.quantity
-        total_price += item_total
-
-        order_items.append(
-            models.OrderItem(
-                record_id=record.id,
-                unit_price=record.price,
-                quantity=item.quantity
-            )
+        # Create order 
+        new_order = models.Order(
+            user_id=current_user.id,
+            total_price=total_price,
+            status="paid",  # add this field in model
+            shipping_address=data.address,
+            items=order_items
         )
 
-    #Create order
-    new_order = models.Order(
-        user_id=current_user.id,
-        total_price=total_price,
-        items=order_items
-    )
-
-    try:
         db.add(new_order)
-        
-        #Clear cart after checkout
-        db.query(models.CartItem).filter(models.CartItem.cart_id == cart.id).delete()
+
+        # Clear cart 
+        db.query(models.CartItem).filter(
+            models.CartItem.cart_id == cart.id
+        ).delete()
 
         db.commit()
         db.refresh(new_order)
 
         return {
-            "message": "Payment successful. Order placed.",
+            "message": "Order placed successfully",
             "order_id": new_order.id,
-            "total": float(total_price),
-            "shipping_address": data.address
+            "total": float(total_price)
         }
 
     except Exception as e:
         db.rollback()
         print(f"CHECKOUT ERROR: {e}")
         raise HTTPException(status_code=500, detail="Checkout failed")
-
+    
 @app.get("/api/orders/my-history", response_model=List[schemas.OrderOut])
 def get_my_order_history(
     db: Session = Depends(get_db), 
