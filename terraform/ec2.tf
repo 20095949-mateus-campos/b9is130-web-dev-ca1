@@ -67,11 +67,6 @@ resource "github_actions_secret" "ec2_host" {
   repository      = "b9is130-web-dev-ca1"
   secret_name     = "EC2_HOST"
   value = aws_instance.api_server.public_ip
-
-
-  lifecycle {
-    prevent_destroy = true
-  }
 }
 
 output "api_server_ip" {
