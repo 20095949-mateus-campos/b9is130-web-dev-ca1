@@ -137,3 +137,30 @@ export async function removeFromWishlistAPI(recordId) {
 
   return handleResponse(response, "Failed to remove from wishlist");
 }
+
+export async function updateRecord(recordId, updateData) {
+  const response = await fetch(`${API_BASE_URL}/records/${recordId}`, {
+    method: "PATCH",
+    headers: getAuthHeaders(),
+    body: JSON.stringify(updateData),
+  });
+
+  if (!response.ok) {
+    const error = await response.json();
+    throw new Error(error.detail || "Failed to update record");
+  }
+  return await response.json();
+}
+
+export async function deleteRecord(recordId) {
+  const response = await fetch(`${API_BASE_URL}/records/${recordId}`, {
+    method: "DELETE",
+    headers: getAuthHeaders(),
+  });
+
+  if (!response.ok) {
+    const error = await response.json();
+    throw new Error(error.detail || "Failed to delete record");
+  }
+  return true;
+}
