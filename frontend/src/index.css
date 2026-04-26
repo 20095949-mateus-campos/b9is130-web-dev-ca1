@@ -570,3 +570,21 @@ p {
     flex-wrap: wrap;
   }
 }
+
+.auth-error {
+  margin-top: 16px;
+  color: #991b1b;
+  background: #fee2e2;
+  padding: 10px 12px;
+  border-radius: 12px;
+  font-size: 14px;
+}
+
+.auth-success {
+  margin-top: 16px;
+  color: #166534;
+  background: #dcfce7;
+  padding: 10px 12px;
+  border-radius: 12px;
+  font-size: 14px;
+}

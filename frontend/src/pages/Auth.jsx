@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { loginUser, registerUser } from "../services/api";
 
 function Auth() {
     const navigate = useNavigate();
@@ -9,21 +10,31 @@ function Auth() {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
 
-    function handleSubmit(e) {
+    const [error, setError] = useState("");
+    const [message, setMessage] = useState("");
+    const [loading, setLoading] = useState(false);
+
+    async function handleSubmit(e) {
         e.preventDefault();
+        setError("");
+        setMessage("");
+        setLoading(true);
 
-        if (mode === "signin") {
-            localStorage.setItem("demoUser", JSON.stringify({
-                username: "Demo User",
-                email: email,
-                role: "Customer",
-            }));
-
-            navigate("/profile");
-        } else {
-            setMode("signin");
-            setPassword("");
-            alert("Account created successfully. Please sign in.");
+        try {
+            if (mode === "signin") {
+                await loginUser(email, password);
+                navigate("/profile");
+            } else {
+                await registerUser(username, email, password);
+                setMessage("Account created successfully. Please sign in.");
+                setMode("signin");
+                setUsername("");
+                setPassword("");
+            }
+        } catch (err) {
+            setError(err.message || "Something went wrong");
+        } finally {
+            setLoading(false);
         }
     }
 
@@ -43,7 +54,11 @@ function Auth() {
                         <button
                             type="button"
                             className={mode === "signin" ? "active" : ""}
-                            onClick={() => setMode("signin")}
+                            onClick={() => {
+                                setMode("signin");
+                                setError("");
+                                setMessage("");
+                            }}
                         >
                             Sign In
                         </button>
@@ -51,7 +66,11 @@ function Auth() {
                         <button
                             type="button"
                             className={mode === "signup" ? "active" : ""}
-                            onClick={() => setMode("signup")}
+                            onClick={() => {
+                                setMode("signup");
+                                setError("");
+                                setMessage("");
+                            }}
                         >
                             Sign Up
                         </button>
@@ -63,6 +82,9 @@ function Auth() {
                             ? "Access your profile and order history."
                             : "Join Vinyl Store and start collecting."}
                     </p>
+
+                    {error && <p className="auth-error">{error}</p>}
+                    {message && <p className="auth-success">{message}</p>}
 
                     <form onSubmit={handleSubmit} className="auth-form">
                         {mode === "signup" && (
@@ -91,8 +113,12 @@ function Auth() {
                             required
                         />
 
-                        <button type="submit">
-                            {mode === "signin" ? "Sign In" : "Sign Up"}
+                        <button type="submit" disabled={loading}>
+                            {loading
+                                ? "Please wait..."
+                                : mode === "signin"
+                                    ? "Sign In"
+                                    : "Sign Up"}
                         </button>
                     </form>
                 </div>
