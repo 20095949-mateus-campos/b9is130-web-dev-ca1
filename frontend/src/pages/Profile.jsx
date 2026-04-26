@@ -1,11 +1,54 @@
-function Profile() {
-    const savedUser = JSON.parse(localStorage.getItem("demoUser"));
+import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { getCurrentUser } from "../services/api";
 
-    const user = savedUser || {
-        username: "Demo User",
-        email: "user@example.com",
-        role: "Customer",
-    };
+function Profile() {
+    const navigate = useNavigate();
+
+    const [user, setUser] = useState(null);
+    const [error, setError] = useState("");
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        async function loadUser() {
+            try {
+                const data = await getCurrentUser();
+                setUser({
+                    username: data.username,
+                    email: data.email,
+                    role: data.is_admin ? "Admin" : "Customer",
+                });
+            } catch (err) {
+                setError(err.message || "Please sign in first");
+            } finally {
+                setLoading(false);
+            }
+        }
+
+        loadUser();
+    }, []);
+
+    if (loading) {
+        return (
+            <section className="page-container">
+                <p className="muted-text">Loading profile...</p>
+            </section>
+        );
+    }
+
+    if (error) {
+        return (
+            <section className="page-container">
+                <div className="profile-card">
+                    <h2>Please sign in</h2>
+                    <p className="muted-text">{error}</p>
+                    <button className="secondary-btn" onClick={() => navigate("/auth")}>
+                        Go to Sign In
+                    </button>
+                </div>
+            </section>
+        );
+    }
 
     return (
         <section className="page-container">
@@ -23,7 +66,7 @@ function Profile() {
                     <h2>{user.username}</h2>
                     <p>{user.email}</p>
 
-                    <span className="status-badge">Active Customer</span>
+                    <span className="status-badge">Active {user.role}</span>
                 </div>
 
                 <div className="profile-card">
