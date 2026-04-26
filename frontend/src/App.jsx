@@ -11,6 +11,7 @@ import Profile from "./pages/Profile";
 import MyOrders from "./pages/MyOrders";
 import OrderDetails from "./pages/OrderDetails";
 import Checkout from "./pages/Checkout";
+import Footer from "./components/Footer";
 
 function App() {
   const [data, setData] = useState([]);
@@ -41,6 +42,7 @@ function App() {
           <Route path="/checkout" element={<Checkout />} />
         </Routes>
       </main>
+        <Footer />
     </div>
     </>
   );
