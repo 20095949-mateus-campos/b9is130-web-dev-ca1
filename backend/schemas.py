@@ -42,9 +42,6 @@ class UserOut(BaseModel):
     class Config:
         from_attributes = True
 
-class OrderCreate(BaseModel):
-    record_ids: List[int]
-
 class OrderItemOut(BaseModel):
     record_id: int
     unit_price: Decimal
@@ -118,3 +115,9 @@ class DiscogsSearchResult(BaseModel):
     year: Optional[str] = None
     genre: List[str] = []
     resource_url: str
+
+class CheckoutData(BaseModel):
+    address: str
+    card_number: str
+    card_holder: str
+    expiry_date: str
