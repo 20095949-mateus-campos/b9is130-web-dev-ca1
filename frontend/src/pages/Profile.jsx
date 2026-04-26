@@ -113,6 +113,19 @@ function Profile() {
 
                     <button className="secondary-btn">Add Address</button>
                 </div>
+
+                {user.role === "Admin" && (
+                    <div className="profile-card border-accent border-2">
+                        <h2>Inventory Control</h2>
+                        <p className="muted-text">Import new records from Discogs or manage stock.</p>
+                        <button 
+                            className="secondary-btn"
+                            onClick={() => navigate("/admin/catalog")}
+                        >
+                            Manage Catalog
+                        </button>
+                    </div>
+                )}
             </div>
         </section>
     );
