@@ -16,6 +16,12 @@ const Navbar = () => {
   const { cart } = useCart();
   const [animate, setAnimate] = useState(false);
 
+  const handleSearch = (e) => {
+    if (e.key === "Enter") {
+      navigate(`/?search=${searchTerm}`);
+    }
+  };
+
   useEffect(() => {
     const handleClickOutside = (e) => {
       if (userRef.current && !userRef.current.contains(e.target)) {
@@ -96,7 +102,7 @@ const Navbar = () => {
                   {isLoggedIn ? (
                     <>
                       <Link
-                        to="/auth"
+                        to="/profile"
                         className="block px-[1rem] py-[0.6rem] text-sm hover:underline no-underline text-[var(--color-text-bright)]"
                         onClick={() => setUserOpen(false)}
                       >

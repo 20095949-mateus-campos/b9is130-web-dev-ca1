@@ -72,7 +72,7 @@ export async function getCurrentUser() {
 }
 
 export async function getMyOrders() {
-    const response = await fetch(`${API_BASE_URL}/api/orders/my-history`, {
+    const response = await fetch(`${API_BASE_URL}/orders/my-history`, {
         headers: authHeaders(),
     });
 

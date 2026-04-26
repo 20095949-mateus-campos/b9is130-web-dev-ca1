@@ -521,7 +521,7 @@ def checkout(
         print(f"CHECKOUT ERROR: {e}")
         raise HTTPException(status_code=500, detail="Checkout failed")
     
-@app.get("/api/orders/my-history", response_model=List[schemas.OrderOut])
+@app.get("/orders/my-history", response_model=List[schemas.OrderOut])
 def get_my_order_history(
     db: Session = Depends(get_db), 
     current_user: models.User = Depends(get_current_user)

@@ -12,6 +12,7 @@ import MyOrders from "./pages/MyOrders";
 import OrderDetails from "./pages/OrderDetails";
 import Checkout from "./pages/Checkout";
 import Footer from "./components/Footer";
+import AdminCatalog from "./pages/AdminCatalog";
 
 function App() {
   const [data, setData] = useState([]);
