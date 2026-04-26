@@ -84,6 +84,8 @@ jobs:
               -e DB_PASSWORD=${{ secrets.DB_PASSWORD }} \
               -e DB_NAME=${{ secrets.DB_NAME }} \
               -e DB_PORT=${{ secrets.DB_PORT }} \
+              -e DISCOGS_TOKEN=${{ secrets.DISCOGS_TOKEN }} \
+              -e SECRET_KEY=${{ secrets.SECRET_KEY }} \
               -e FRONTEND_URL="${{ secrets.CLOUDFRONT_DOMAIN }}" \
               --restart always $REGISTRY_URL/record-store-backend:latest
 
