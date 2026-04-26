@@ -543,6 +543,16 @@ p {
   place-items: center;
 }
 
+.cart-bounce {
+  animation: cartPop 0.3s ease;
+}
+
+@keyframes cartPop {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.25); }
+  100% { transform: scale(1); }
+}
+
 .quick-nav {
   width: 100%;
   border-top: 1px solid var(--color-border);
