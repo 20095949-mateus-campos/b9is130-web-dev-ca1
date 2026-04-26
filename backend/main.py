@@ -11,6 +11,7 @@ import os
 from dotenv import load_dotenv
 from decimal import Decimal
 from discogs import search_discogs, get_discogs_metadata
+import re
 
 load_dotenv()
 
@@ -442,29 +443,38 @@ def checkout(
     if not cart or not cart.items:
         raise HTTPException(status_code=400, detail="Cart is empty")
 
-    # Basic validation
-    if not data.address.strip():
+    card_number = data.card_number.replace(" ", "")
+    expiry = data.expiry_date.replace(" ", "").strip()
+    address = data.address.strip()
+
+    if not address:
         raise HTTPException(status_code=400, detail="Address is required")
 
-    if not data.card_number.isdigit() or not (13 <= len(data.card_number) <= 19):
+    if not card_number.isdigit() or not (13 <= len(card_number) <= 19):
         raise HTTPException(status_code=400, detail="Invalid card number")
+    
+    if not re.match(r"^(0[1-9]|1[0-2])\/\d{2}$", expiry):
+        raise HTTPException(status_code=400, detail="Invalid expiry date")
 
     total_price = 0
     order_items = []
 
     try:
-        # Process items safely
         for item in cart.items:
             record = db.query(models.Record).filter(
                 models.Record.id == item.record_id
-            ).with_for_update().first()  
+            ).with_for_update().first()
+
             if not record:
-                raise HTTPException(status_code=404, detail=f"Record {item.record_id} not found")
+                raise HTTPException(
+                    status_code=404,
+                    detail=f"Record {item.record_id} not found"
+                )
 
             if record.stock_quantity < item.quantity:
                 raise HTTPException(
                     status_code=400,
-                    detail=f"{record.title} out of stock"
+                    detail=f"{record.title} does not have enough stock"
                 )
 
             record.stock_quantity -= item.quantity
@@ -480,18 +490,16 @@ def checkout(
                 )
             )
 
-        # Create order 
         new_order = models.Order(
             user_id=current_user.id,
             total_price=total_price,
-            status="paid",  # add this field in model
-            shipping_address=data.address,
+            status="paid",
+            shipping_address=address,
             items=order_items
         )
 
         db.add(new_order)
 
-        # Clear cart 
         db.query(models.CartItem).filter(
             models.CartItem.cart_id == cart.id
         ).delete()
