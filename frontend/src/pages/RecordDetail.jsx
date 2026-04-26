@@ -24,7 +24,7 @@ function RecordDetail() {
   const isOutOfStock = record.stock_quantity < 1;
 
   return (
-    <div className="bg-[var(--color-bg)] min-h-screen">
+    <div className="bg-[var(--color-bg)] min-h-screen pt-[5px]">
       {/* BREADCRUMB */}
       <div className="max-w-6xl mx-auto text-sm pl-[2rem] my-[15px]">
         <Link to="/" className="underline">
@@ -38,7 +38,10 @@ function RecordDetail() {
       <div className="bg-[var(--color-secondary)] p-[2rem] mx-[2rem] flex gap-[4rem]">
         {/* LEFT SIDE */}
         <div className="w-1/2 pl-[4rem]">
-          <img src={record.cover_image} className="w-full aspect-[4/3] object-cover" />
+          <img
+            src={record.cover_image}
+            className="w-full aspect-[4/3] object-cover"
+          />
         </div>
 
         {/* RIGHT SIDE */}
@@ -58,52 +61,73 @@ function RecordDetail() {
           <p className="mb-[20px]">
             <strong>GENRE:</strong> {record.genre}
           </p>
-          <p className="mb-[20px]">
-            {record.description}
-          </p>
+          <p className="mb-[20px]">{record.description}</p>
 
           {/* STOCK */}
           {isOutOfStock ? (
             <p className="text-red-500 mb-[10px]">Out of Stock</p>
           ) : (
-            <p className="text-[var(--color-accent)] font-[600] mb-[10px]">{record.stock_quantity} available</p>
+            <p className="text-[var(--color-accent)] font-[600] mb-[10px]">
+              {record.stock_quantity} available
+            </p>
           )}
 
           {/* QUANTITY + BUTTON */}
           <div className="flex items-center gap-4 mb-[10px]">
-            <div className="flex border-1 border-[var(--color-primary)] rounded-[5px]">
-              <button
-                className="px-[15px] bg-transparent border-none outline-none"
-                onClick={() => setQuantity((q) => Math.max(1, q - 1))}
-              >
-                -
-              </button>
-              <span>{quantity}</span>
-              <button
-                className="px-[15px] bg-transparent border-none outline-none"
-                onClick={() =>
-                  setQuantity((q) => Math.min(record.stock_quantity, q + 1))
-                }
-              >
-                +
-              </button>
+            <div className="flex items-center gap-3">
+              <div className="px-[5px] py-[5px] border border-[var(--color-primary)] rounded-[5px] flex items-center">
+                {/* MINUS */}
+                <button
+                  className={`px-[10px] text-[20px] bg-transparent border-none outline-none ${
+                    quantity === 1
+                      ? "opacity-30 cursor-not-allowed"
+                      : "cursor-pointer"
+                  }`}
+                  disabled={quantity === 1}
+                  onClick={() => setQuantity((q) => Math.max(1, q - 1))}
+                >
+                  -
+                </button>
+
+                {/* VALUE */}
+                <span className="min-w-[20px] text-center">{quantity}</span>
+
+                {/* PLUS */}
+                <button
+                  className={`px-[10px] text-[20px] bg-transparent border-none outline-none ${
+                    quantity >= record.stock_quantity
+                      ? "opacity-30 cursor-not-allowed"
+                      : "cursor-pointer"
+                  }`}
+                  disabled={quantity >= record.stock_quantity}
+                  onClick={() =>
+                    setQuantity((q) => Math.min(record.stock_quantity, q + 1))
+                  } 
+                >
+                  +
+                </button>
+              </div>
             </div>
 
-            <button onClick={()=> addToCart(record, quantity)}
-              className="bg-[var(--color-primary)] text-[var(--color-text-bright)] px-[3rem] py-[10px] mx-[2rem]"
+            <button
+              onClick={() => addToCart(record, quantity)}
+              className="bg-[var(--color-primary)] text-[var(--color-text-bright)] 
+                         px-[2rem] py-[10px] mx-[2rem] rounded-[10px] cursor-pointer"
               disabled={isOutOfStock}
             >
               ADD TO CART
             </button>
 
             {/* WISHLIST */}
-             <button
-              className="flex gap-[10px] mt-2 text-sm bg-transparent rounded-[10px] border-[var(--color-accent)] text-[var(--color-text)] px-[2rem] py-[10px]"
+            <button
+              className="flex mt-2 text-sm bg-transparent rounded-[10px]
+                        border border-[var(--color-accent)] gap-[5px]
+                        text-[var(--color-text)] px-[2rem] py-[10px]
+                        cursor-pointer outline-none focus:outline-none"
             >
-             <FaRegHeart />
-             <span>ADD TO WISHLIST</span>
+              <FaRegHeart />
+              <span>WISHLIST</span>
             </button>
-
           </div>
         </div>
       </div>

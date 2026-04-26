@@ -26,12 +26,12 @@ const Navbar = () => {
         </div>
 
         {/* MAIN NAV */}
-        <div className="max-w-7xl mx-auto px-[2.5rem] py-[1.2rem] flex items-center justify-between">
+        <div className="max-w-7xl mx-auto px-[2.5rem] py-[1rem] flex items-center justify-between">
 
           {/* LOGO */}
           <Link
             to="/"
-            className="text-[3rem] ml-[2rem] font-[600] tracking-tight text-[var(--color-text)] no-underline border-none outline-none
+            className="text-[2rem] ml-[2rem] font-[600] tracking-tight text-[var(--color-text)] no-underline border-none outline-none
                       hover:no-underline focus:no-underline"
           >
             Trackora
@@ -43,7 +43,7 @@ const Navbar = () => {
               flex items-center 
               bg-white/60 backdrop-blur-md
               border border-[var(--color-primary)]
-              rounded-full px-[1.2rem] h-[48px] mt-[1rem]
+              rounded-full px-[1.2rem] h-[40px]
               shadow-sm
               focus-within:ring-2 focus-within:ring-[var(--color-accent)]
               transition
