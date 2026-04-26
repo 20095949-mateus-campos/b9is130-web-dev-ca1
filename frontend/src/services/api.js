@@ -83,3 +83,34 @@ export async function getOrderById(orderId) {
 export function logoutUser() {
     localStorage.removeItem("token");
 }
+
+export async function getRecords(genre = "", search = "") {
+    let url = `${API_BASE_URL}/records`;
+
+    const params = new URLSearchParams();
+    if (genre) params.append("genre", genre);
+    if (search) params.append("search", search);
+
+    if (params.toString()) {
+        url += `?${params.toString()}`;
+    }
+
+    return await response.json();
+}
+
+export const addToCartAPI = async (data, token) => {
+  const res = await fetch("http://localhost:8000/cart/add", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`, // REQUIRED (your backend uses auth)
+    },
+    body: JSON.stringify(data),
+  });
+
+  if (!res.ok) {
+    throw new Error("Failed to add to cart");
+  }
+
+  return res.json();
+};
