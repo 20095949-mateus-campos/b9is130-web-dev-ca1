@@ -443,3 +443,23 @@ def get_order_details(
         raise HTTPException(status_code=403, detail="Not authorized to view this order")
 
     return order
+
+# --------- Wishlist Endpoints ---------
+@app.get("/wishlist", response_model=List[schemas.RecordSchema])
+def get_wishlist(db: Session = Depends(get_db), current_user: models.User = Depends(get_current_user)):
+    return [item.record for item in db.query(models.Wishlist).filter(models.Wishlist.user_id == current_user.id).all()]
+
+@app.post("/wishlist/{record_id}")
+def add_to_wishlist(record_id: int, db: Session = Depends(get_db), current_user: models.User = Depends(get_current_user)):
+    exists = db.query(models.Wishlist).filter_by(user_id=current_user.id, record_id=record_id).first()
+    if not exists:
+        new_item = models.Wishlist(user_id=current_user.id, record_id=record_id)
+        db.add(new_item)
+        db.commit()
+    return {"message": "Added to wishlist"}
+
+@app.delete("/wishlist/{record_id}")
+def remove_from_wishlist(record_id: int, db: Session = Depends(get_db), current_user: models.User = Depends(get_current_user)):
+    db.query(models.Wishlist).filter_by(user_id=current_user.id, record_id=record_id).delete()
+    db.commit()
+    return {"message": "Removed from wishlist"}

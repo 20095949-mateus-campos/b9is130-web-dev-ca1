@@ -88,3 +88,13 @@ class CartItem(Base):
 
     cart = relationship("Cart", back_populates="items")
     record = relationship("Record")
+
+class Wishlist(Base):
+    __tablename__ = "wishlist"
+
+    id = Column(Integer, primary_key=True, index=True)
+    user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
+    record_id = Column(Integer, ForeignKey("records.id"), nullable=False)
+
+    user = relationship("User", backref="wishlist_items")
+    record = relationship("Record")
