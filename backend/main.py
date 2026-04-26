@@ -418,6 +418,29 @@ def create_order(
             )
         )
 
+    #Create order
+    new_order = models.Order(
+        user_id=current_user.id,
+        total_price=total_price,
+        items=order_items
+    )
+
+    try:
+        db.add(new_order)
+
+        db.commit()
+        db.refresh(new_order)
+
+        return {
+            "message": "Order placed successfully",
+            "order_id": new_order.id,
+            "total": float(total_price)
+        }
+
+    except Exception as e:
+        db.rollback()
+        print(f"ORDER ERROR: {e}")
+        raise HTTPException(status_code=500, detail="Failed to create order")
 
 
 @app.get("/api/orders/my-history", response_model=List[schemas.OrderOut])
