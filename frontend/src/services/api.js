@@ -83,3 +83,18 @@ export async function getOrderById(orderId) {
 export function logoutUser() {
     localStorage.removeItem("token");
 }
+
+export async function getRecords(genre = "", search = "") {
+    let url = `${API_BASE_URL}/records`;
+
+    const params = new URLSearchParams();
+    if (genre) params.append("genre", genre);
+    if (search) params.append("search", search);
+
+    if (params.toString()) {
+        url += `?${params.toString()}`;
+    }
+
+    const response = await fetch(url);
+    return handleResponse(response, "Could not load records");
+}
