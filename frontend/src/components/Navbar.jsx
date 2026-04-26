@@ -73,7 +73,7 @@ const Navbar = () => {
 
             <button className="nav-icon">
               <FiUser />
-            </Link>
+            </button>
 
             {/* Wishlist Toggle Button */}
             <button
