@@ -116,6 +116,7 @@ def update_user(
 
     return current_user
 
+
 # --------- Records Endpoints ---------
 @app.get("/records", response_model=List[schemas.RecordSchema])
 def get_records(
@@ -158,6 +159,13 @@ async def get_record_by_id(record_id: int, db: Session = Depends(get_db)):
         "store_details": record,
         "discogs_metadata": external_data
     }
+
+@app.get("/genres")
+def get_genres(db: Session = Depends(get_db)):
+    genres = db.query(models.Record.genre).distinct().all()
+
+    # Extract values from tuples and remove None
+    return [g[0] for g in genres if g[0] is not None]
 
 @app.post("/admin/records", response_model=schemas.RecordSchema)
 def create_record(
@@ -342,7 +350,7 @@ def get_cart(
     }
 
 @app.delete("/cart/remove/{record_id}")
-def remove_from_cart(
+def remove_item_from_cart(
     record_id: int,
     db: Session = Depends(get_db),
     current_user: models.User = Depends(get_current_user)
@@ -370,48 +378,79 @@ def remove_from_cart(
 
 
 # --------- Order Endpoints ---------
-@app.post("/orders", status_code=201)
-def create_order(
-    order_data: schemas.OrderCreate, 
+@app.post("/checkout")
+def checkout(
+    data: schemas.CheckoutData,
     db: Session = Depends(get_db),
     current_user: models.User = Depends(get_current_user)
 ):
+    #Get user's cart
+    cart = db.query(models.Cart).filter(models.Cart.user_id == current_user.id).first()
+
+    if not cart or not cart.items:
+        raise HTTPException(status_code=400, detail="Cart is empty")
+
+    #payment validation
+    if len(data.card_number) < 8:
+        raise HTTPException(status_code=400, detail="Invalid card number")
+
     total_price = 0
     order_items = []
-    
-    for rid in order_data.record_ids:
-        record = db.query(models.Record).filter(models.Record.id == rid).first()
-        
-        if not record:
-            raise HTTPException(status_code=404, detail=f"Record ID {rid} not found")
-        if record.stock_quantity < 1:
-            raise HTTPException(status_code=400, detail=f"'{record.title}' is out of stock")
-        
-        record.stock_quantity -= 1
-        total_price += record.price
-        
-        item = models.OrderItem(
-            record_id=record.id,
-            unit_price=record.price,
-            quantity=1
-        )
-        order_items.append(item)
 
+    #Process cart items
+    for item in cart.items:
+        record = db.query(models.Record).filter(models.Record.id == item.record_id).first()
+
+        if not record:
+            raise HTTPException(status_code=404, detail=f"Record ID {item.record_id} not found")
+
+        if record.stock_quantity < item.quantity:
+            raise HTTPException(
+                status_code=400,
+                detail=f"'{record.title}' does not have enough stock"
+            )
+
+        # Deduct stock
+        record.stock_quantity -= item.quantity
+
+        item_total = record.price * item.quantity
+        total_price += item_total
+
+        order_items.append(
+            models.OrderItem(
+                record_id=record.id,
+                unit_price=record.price,
+                quantity=item.quantity
+            )
+        )
+
+    #Create order
     new_order = models.Order(
         user_id=current_user.id,
         total_price=total_price,
         items=order_items
     )
-    
+
     try:
         db.add(new_order)
+        
+        #Clear cart after checkout
+        db.query(models.CartItem).filter(models.CartItem.cart_id == cart.id).delete()
+
         db.commit()
         db.refresh(new_order)
-        return {"message": "Order successful", "order_id": new_order.id, "total": total_price}
+
+        return {
+            "message": "Payment successful. Order placed.",
+            "order_id": new_order.id,
+            "total": float(total_price),
+            "shipping_address": data.address
+        }
+
     except Exception as e:
         db.rollback()
-        print(f"DATABASE ERROR: {e}") 
-        raise HTTPException(status_code=500, detail="Could not process order")
+        print(f"CHECKOUT ERROR: {e}")
+        raise HTTPException(status_code=500, detail="Checkout failed")
 
 @app.get("/api/orders/my-history", response_model=List[schemas.OrderOut])
 def get_my_order_history(
@@ -464,3 +503,23 @@ def get_order_details(
         raise HTTPException(status_code=403, detail="Not authorized to view this order")
 
     return order
+
+# --------- Wishlist Endpoints ---------
+@app.get("/wishlist", response_model=List[schemas.RecordSchema])
+def get_wishlist(db: Session = Depends(get_db), current_user: models.User = Depends(get_current_user)):
+    return [item.record for item in db.query(models.Wishlist).filter(models.Wishlist.user_id == current_user.id).all()]
+
+@app.post("/wishlist/{record_id}")
+def add_to_wishlist(record_id: int, db: Session = Depends(get_db), current_user: models.User = Depends(get_current_user)):
+    exists = db.query(models.Wishlist).filter_by(user_id=current_user.id, record_id=record_id).first()
+    if not exists:
+        new_item = models.Wishlist(user_id=current_user.id, record_id=record_id)
+        db.add(new_item)
+        db.commit()
+    return {"message": "Added to wishlist"}
+
+@app.delete("/wishlist/{record_id}")
+def remove_from_wishlist(record_id: int, db: Session = Depends(get_db), current_user: models.User = Depends(get_current_user)):
+    db.query(models.Wishlist).filter_by(user_id=current_user.id, record_id=record_id).delete()
+    db.commit()
+    return {"message": "Removed from wishlist"}
