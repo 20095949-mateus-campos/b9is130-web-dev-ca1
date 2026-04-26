@@ -40,6 +40,7 @@ function App() {
           <Route path="/orders" element={<MyOrders />} />
           <Route path="/orders/:id" element={<OrderDetails />} />
           <Route path="/checkout" element={<Checkout />} />
+          <Route path="/admin/catalog" element={<AdminCatalog />} />
         </Routes>
       </main>
         <Footer />
