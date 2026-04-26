@@ -2,10 +2,16 @@ import { useState, useEffect } from "react";
 import { FiUser, FiHeart, FiShoppingCart, FiSearch } from "react-icons/fi";
 import { Link } from "react-router-dom";
 import WishlistSidebar from "./WishlistSidebar";
+import { useCart } from "../context/CartContext";
 
 const Navbar = () => {
   const [wishlistOpen, setWishlistOpen] = useState(false);
+  const { cart } = useCart();
+  
+  // Calculate total items for the badge (from Version B)
+  const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0);
 
+  // ESC key handler for Wishlist (from Version A)
   useEffect(() => {
     if (!wishlistOpen) return;
     const handleEsc = (e) => e.key === "Escape" && setWishlistOpen(false);
@@ -34,7 +40,7 @@ const Navbar = () => {
             className="text-[2rem] ml-[2rem] font-[600] tracking-tight text-[var(--color-text)] no-underline border-none outline-none
                       hover:no-underline focus:no-underline"
           >
-            Trackora
+            Vinyl Store
           </Link>
 
           {/* SEARCH */}
@@ -67,8 +73,9 @@ const Navbar = () => {
 
             <button className="nav-icon">
               <FiUser />
-            </button>
+            </Link>
 
+            {/* Wishlist Toggle Button */}
             <button
               onClick={() => setWishlistOpen(true)}
               className="nav-icon"
@@ -76,14 +83,29 @@ const Navbar = () => {
               <FiHeart />
             </button>
 
-            <Link to="/cart" className="nav-icon">
+            {/* Cart Link with Count Badge (from Version B) */}
+            <Link to="/cart" className="relative hover:text-[var(--color-accent)] transition">
               <FiShoppingCart />
+              {totalItems > 0 && (
+                <span className="absolute -top-2 -right-3 bg-[var(--color-accent)] text-white text-[12px] font-bold px-2 py-0.5 rounded-full">
+                  {totalItems}
+                </span>
+              )}
             </Link>
 
           </div>
         </div>
+
+        {/* Quick Nav (The sub-menu from Version B) */}
+        <div className="flex justify-center gap-12 pb-4 text-sm border-t border-gray-100 pt-4">
+          <Link to="/" className="hover:underline">Home</Link>
+          <Link to="/auth" className="hover:underline">Account</Link>
+          <Link to="/profile" className="hover:underline">Profile</Link>
+          <Link to="/orders" className="hover:underline">My Orders</Link>
+        </div>
       </nav>
 
+      {/* Sidebar Drawer Logic */}
       <WishlistSidebar
         isOpen={wishlistOpen}
         onClose={() => setWishlistOpen(false)}
