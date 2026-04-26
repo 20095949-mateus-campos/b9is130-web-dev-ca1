@@ -92,13 +92,7 @@ export function logoutUser() {
 }
 
 export async function getRecords() {
-  const response = await fetch(`${API_BASE_URL}/records`);
-
-  if (!response.ok) {
-    throw new Error("Failed to fetch records");
-  }
-
-    const response = await fetch(url);
+    const response = await fetch(`${API_BASE_URL}/records`);
 
     if (!response.ok) {
         throw new Error("Failed to fetch records");
