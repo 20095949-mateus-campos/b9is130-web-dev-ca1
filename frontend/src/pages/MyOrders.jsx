@@ -26,6 +26,7 @@ function MyOrders() {
 
     function formatDate(dateValue) {
         if (!dateValue) return "No date";
+
         return new Date(dateValue).toLocaleDateString("en-IE", {
             day: "2-digit",
             month: "long",
@@ -69,7 +70,9 @@ function MyOrders() {
             {orders.length === 0 ? (
                 <div className="profile-card">
                     <h2>No orders yet</h2>
-                    <p className="muted-text">Your orders will appear here after checkout.</p>
+                    <p className="muted-text">
+                        Your orders will appear here after checkout.
+                    </p>
                 </div>
             ) : (
                 <div className="orders-list">
@@ -90,11 +93,18 @@ function MyOrders() {
                                 <strong>{formatPrice(order.total_price)}</strong>
                             </div>
 
-                            <span className={`order-status ${(order.status || "processing").toLowerCase()}`}>
+                            <span
+                                className={`order-status ${(
+                                    order.status || "processing"
+                                ).toLowerCase()}`}
+                            >
                                 {order.status || "Processing"}
                             </span>
 
-                            <Link to={`/orders/${order.id}`} className="secondary-btn order-link-btn">
+                            <Link
+                                to={`/orders/${order.id}`}
+                                className="secondary-btn order-link-btn"
+                            >
                                 View Details
                             </Link>
                         </div>

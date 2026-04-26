@@ -74,10 +74,16 @@ function OrderDetails() {
                     <div className="order-details-top">
                         <div>
                             <h2>Order Summary</h2>
-                            <p className="muted-text">Placed on {formatDate(order.created_at)}</p>
+                            <p className="muted-text">
+                                Placed on {formatDate(order.created_at)}
+                            </p>
                         </div>
 
-                        <span className={`order-status ${(order.status || "processing").toLowerCase()}`}>
+                        <span
+                            className={`order-status ${(
+                                order.status || "processing"
+                            ).toLowerCase()}`}
+                        >
                             {order.status || "Processing"}
                         </span>
                     </div>
@@ -86,7 +92,9 @@ function OrderDetails() {
                         {order.items?.map((item, index) => (
                             <div className="order-item-row" key={index}>
                                 <div>
-                                    <strong>{item.record_title || `Record #${item.record_id}`}</strong>
+                                    <strong>
+                                        {item.record_title || `Record #${item.record_id}`}
+                                    </strong>
                                     <p className="muted-text">Record ID: {item.record_id}</p>
                                 </div>
 

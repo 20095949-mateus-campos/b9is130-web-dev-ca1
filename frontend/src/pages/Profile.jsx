@@ -13,6 +13,7 @@ function Profile() {
         async function loadUser() {
             try {
                 const data = await getCurrentUser();
+
                 setUser({
                     username: data.username,
                     email: data.email,
