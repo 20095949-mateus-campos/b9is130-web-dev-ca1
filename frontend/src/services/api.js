@@ -91,8 +91,12 @@ export function logoutUser() {
     localStorage.removeItem("token");
 }
 
-export async function getRecords() {
-    const response = await fetch(`${API_BASE_URL}/records`);
+export async function getRecords(searchQuery = "") {
+    const url = searchQuery 
+        ? `${API_BASE_URL}/records?search=${encodeURIComponent(searchQuery)}`
+        : `${API_BASE_URL}/records`;
+    
+    const response = await fetch(`${url}`);
 
     if (!response.ok) {
         throw new Error("Failed to fetch records");
