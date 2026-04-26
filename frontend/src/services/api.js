@@ -108,3 +108,17 @@ export async function getMyOrders() {
 
     return await response.json();
 }
+
+export async function getOrderById(orderId) {
+    const response = await fetch(`${API_BASE_URL}/orders/${orderId}`, {
+        headers: {
+            ...authHeaders(),
+        },
+    });
+
+    if (!response.ok) {
+        throw new Error("Could not load order details");
+    }
+
+    return await response.json();
+}
