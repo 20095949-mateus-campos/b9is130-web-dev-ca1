@@ -49,6 +49,7 @@ class Order(Base):
     user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
     total_price = Column(Numeric(10, 2), nullable=False)
     status = Column(String(50), default="pending")
+    shipping_address = Column(String(500), nullable=True)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
 
     user = relationship("User", back_populates="orders")
