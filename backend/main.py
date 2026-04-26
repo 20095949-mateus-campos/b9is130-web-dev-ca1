@@ -391,6 +391,34 @@ def create_order(
     total_price = 0
     order_items = []
 
+    #Loop through cart items
+    for item in cart.items:
+        record = db.query(models.Record).filter(models.Record.id == item.record_id).first()
+
+        if not record:
+            raise HTTPException(status_code=404, detail=f"Record ID {item.record_id} not found")
+
+        if record.stock_quantity < item.quantity:
+            raise HTTPException(
+                status_code=400,
+                detail=f"'{record.title}' does not have enough stock"
+            )
+
+        # Deduct stock
+        record.stock_quantity -= item.quantity
+
+        item_total = record.price * item.quantity
+        total_price += item_total
+
+        order_items.append(
+            models.OrderItem(
+                record_id=record.id,
+                unit_price=record.price,
+                quantity=item.quantity
+            )
+        )
+
+
 
 @app.get("/api/orders/my-history", response_model=List[schemas.OrderOut])
 def get_my_order_history(
