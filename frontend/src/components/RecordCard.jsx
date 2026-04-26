@@ -2,6 +2,7 @@ import { useState } from "react";
 import { FaHeart, FaRegHeart } from "react-icons/fa";
 import { Link } from "react-router-dom";
 import { useWishlist } from "../context/WishlistContext";
+import { addToWishlistAPI, removeFromWishlistAPI, getWishlist } from "../services/api";
 
 function RecordCard({ record }) {
   const { toggleWishlist, isInWishlist } = useWishlist();
@@ -41,14 +42,28 @@ function RecordCard({ record }) {
       >
         <div className="relative group p-[20px]">
           <button
-            onClick={(e) => {
+            onClick={async (e) => {
               e.preventDefault();
               e.stopPropagation();
-              toggleWishlist(record);
+
+              try {
+                if (liked) {
+                  await removeFromWishlistAPI(record.id);
+                } else {
+                  await addToWishlistAPI(record.id);
+                }
+
+                toggleWishlist(record); // keep local UI in sync
+              } catch (err) {
+                console.error(err);
+                alert("Wishlist action failed");
+              }
             }}
-            className="absolute top-[1.4rem] right-[1.4rem] z-20 text-[18px] bg-[var(--color-secondary)] cursor-pointer border-none opacity-0 group-hover:opacity-100 transition hover:scale-110"
+            className="absolute top-[1.4rem] right-[1.4rem] z-20 text-[18px] 
+                      bg-[var(--color-secondary)] cursor-pointer border-none 
+                      opacity-0 group-hover:opacity-100 transition hover:scale-110"
           >
-            {liked ? <FaHeart /> : <FaRegHeart />}
+            {liked ? <FaHeart className="text-red-500" /> : <FaRegHeart />}
           </button>
 
           <Link to={`/record/${record.id}`}>
