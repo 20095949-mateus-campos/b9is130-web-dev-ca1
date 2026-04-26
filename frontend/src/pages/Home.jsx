@@ -2,18 +2,23 @@ import { useEffect, useState, useRef } from "react";
 import { getRecords } from "../services/api";
 import RecordCard from "../components/RecordCard";
 import { IoIosArrowBack, IoIosArrowForward } from "react-icons/io";
+import { useLocation } from "react-router-dom";
 
 function Home() {
   const [records, setRecords] = useState([]);
   const scrollRef = useRef(null);
+  const { search } = useLocation();
 
   useEffect(() => {
     const fetchData = async () => {
-      const data = await getRecords();
+      const queryParams = new URLSearchParams(search);
+      const query = queryParams.get("search") || "";
+      
+      const data = await getRecords(query);
       setRecords(data);
     };
     fetchData();
-  }, []);
+  }, [search]);
 
   const scroll = (direction) => {
     const el = scrollRef.current;

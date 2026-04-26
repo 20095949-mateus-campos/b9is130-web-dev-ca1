@@ -3,14 +3,23 @@ import { FiUser, FiHeart, FiShoppingCart, FiSearch } from "react-icons/fi";
 import { Link } from "react-router-dom";
 import WishlistSidebar from "./WishlistSidebar";
 import { useCart } from "../context/CartContext";
+import { useNavigate } from "react-router-dom";
 
 const Navbar = () => {
+  const [searchTerm, setSearchTerm] = useState("");
+  const navigate = useNavigate();
   const [wishlistOpen, setWishlistOpen] = useState(false);
   const { cart, token } = useCart();
 
   const [animate, setAnimate] = useState(false);
 
   const isLoggedIn = !!token;
+
+  const handleSearch = (e) => {
+    if (e.key === "Enter") {
+      navigate(`/?search=${searchTerm}`);
+    }
+  };
 
   useEffect(() => {
     if (cart.length === 0) return;
@@ -61,6 +70,9 @@ console.log("first item:", cart?.items?.[0]);
               <input
                 type="text"
                 placeholder="Search vinyl, artists..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                onKeyDown={handleSearch}
                 className="w-full bg-transparent outline-none border-none text-[14px] placeholder:text-gray-400"
               />
             </div>
