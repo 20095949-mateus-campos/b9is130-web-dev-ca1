@@ -379,46 +379,18 @@ def remove_item_from_cart(
 # --------- Order Endpoints ---------
 @app.post("/orders", status_code=201)
 def create_order(
-    order_data: schemas.OrderCreate, 
     db: Session = Depends(get_db),
     current_user: models.User = Depends(get_current_user)
 ):
+    #Get user's cart
+    cart = db.query(models.Cart).filter(models.Cart.user_id == current_user.id).first()
+
+    if not cart or not cart.items:
+        raise HTTPException(status_code=400, detail="Cart is empty")
+
     total_price = 0
     order_items = []
-    
-    for rid in order_data.record_ids:
-        record = db.query(models.Record).filter(models.Record.id == rid).first()
-        
-        if not record:
-            raise HTTPException(status_code=404, detail=f"Record ID {rid} not found")
-        if record.stock_quantity < 1:
-            raise HTTPException(status_code=400, detail=f"'{record.title}' is out of stock")
-        
-        record.stock_quantity -= 1
-        total_price += record.price
-        
-        item = models.OrderItem(
-            record_id=record.id,
-            unit_price=record.price,
-            quantity=1
-        )
-        order_items.append(item)
 
-    new_order = models.Order(
-        user_id=current_user.id,
-        total_price=total_price,
-        items=order_items
-    )
-    
-    try:
-        db.add(new_order)
-        db.commit()
-        db.refresh(new_order)
-        return {"message": "Order successful", "order_id": new_order.id, "total": total_price}
-    except Exception as e:
-        db.rollback()
-        print(f"DATABASE ERROR: {e}") 
-        raise HTTPException(status_code=500, detail="Could not process order")
 
 @app.get("/api/orders/my-history", response_model=List[schemas.OrderOut])
 def get_my_order_history(

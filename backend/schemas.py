@@ -42,9 +42,6 @@ class UserOut(BaseModel):
     class Config:
         from_attributes = True
 
-class OrderCreate(BaseModel):
-    record_ids: List[int]
-
 class OrderItemOut(BaseModel):
     record_id: int
     unit_price: Decimal
