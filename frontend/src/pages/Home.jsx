@@ -33,7 +33,7 @@ function Home() {
   };
 
   return (
-    <div className="min-h-screen bg-[var(--color-bg)] pt-[5px]">
+    <div className="bg-[var(--color-bg)] pt-[10px]">
       {/* TITLE */}
         <h1 className="text-[2.5rem] font-semibold px-[2.5rem]">
           Featured Records
@@ -67,7 +67,7 @@ function Home() {
         <div
           ref={scrollRef}
           className="
-            flex gap-6 px-[1.5rem] pb-[3rem]
+            flex gap-6 px-[1.5rem]
             overflow-x-auto scroll-smooth
             no-scrollbar
           "

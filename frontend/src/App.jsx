@@ -11,7 +11,7 @@ import Profile from "./pages/Profile";
 import MyOrders from "./pages/MyOrders";
 import OrderDetails from "./pages/OrderDetails";
 import Checkout from "./pages/Checkout";
-import AdminCatalog from "./pages/AdminCatalog";
+import Footer from "./components/Footer";
 
 function App() {
   const [data, setData] = useState([]);
@@ -43,6 +43,7 @@ function App() {
           <Route path="/admin/catalog" element={<AdminCatalog />} />
         </Routes>
       </main>
+        <Footer />
     </div>
     </>
   );

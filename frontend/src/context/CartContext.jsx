@@ -83,20 +83,6 @@ export function CartProvider({ children }) {
   };
 
   const removeFromCart = async (record_id) => {
-    setCart((prev) => {
-      const updatedItems = prev.items.filter(
-        (item) => item.id !== record_id
-      );
-
-      return {
-        items: updatedItems,
-        total: updatedItems.reduce(
-          (sum, item) => sum + item.price * item.quantity,
-          0
-        ),
-      };
-    });
-
     if (!token) return;
 
     try {
@@ -112,7 +98,6 @@ export function CartProvider({ children }) {
       await fetchCart();
     } catch (err) {
       console.error(err);
-      await fetchCart();
     }
   };
 
