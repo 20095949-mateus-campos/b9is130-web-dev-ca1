@@ -30,7 +30,7 @@ function Home() {
   return (
     <div className="min-h-screen bg-[var(--color-bg)]">
       {/* TITLE */}
-      <div className="max-w-6xl mx-auto px-[2rem] mb-10">
+      <div className="max-w-6xl mx-auto px-[1.5rem] mb-10">
         <h1 className="text-[3rem] font-semibold text-gray-900">
           Featured Records
         </h1>
@@ -41,17 +41,10 @@ function Home() {
         {/* LEFT */}
         <button
           onClick={() => scroll("left")}
-          className="
-    absolute left-[1.5rem] top-1/2 -translate-y-1/2
-    bg-[var(--color-primary)] text-[var(--color-secondary)]
-    w-[55px] h-[55px]
-    flex items-center justify-center
-    rounded-full
-    shadow-lg border-none
-    opacity-0 group-hover:opacity-100
-    transition
-    z-[10] cursor-pointer
-  "
+          className="absolute left-[1.5rem] top-1/2 -translate-y-1/2 bg-[var(--color-primary)] 
+                    text-[var(--color-secondary)] w-[55px] h-[55px] flex items-center justify-center
+                    rounded-full shadow-lg border-none opacity-0 group-hover:opacity-100 transition
+                    z-[10] cursor-pointer"
         >
           <IoIosArrowBack size={26} />
         </button>
@@ -59,17 +52,9 @@ function Home() {
         {/* RIGHT */}
         <button
           onClick={() => scroll("right")}
-          className="
-    absolute right-[1.5rem] top-1/2 -translate-y-1/2
-    bg-[var(--color-primary)] text-[var(--color-secondary)]
-    w-[55px] h-[55px] border-none
-    flex items-center justify-center
-    rounded-full
-    shadow-lg
-    opacity-0 group-hover:opacity-100
-    transition
-    z-[10] cursor-pointer
-  "
+          className="absolute right-[1.5rem] top-1/2 -translate-y-1/2 bg-[var(--color-primary)] text-[var(--color-secondary)]
+                    w-[55px] h-[55px] border-none flex items-center justify-center rounded-full shadow-lg opacity-0 group-hover:opacity-100
+                    transition z-[10] cursor-pointer"
         >
           <IoIosArrowForward size={26} />
         </button>
