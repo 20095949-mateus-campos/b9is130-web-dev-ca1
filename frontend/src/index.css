@@ -140,13 +140,13 @@ p {
   display: grid;
   grid-template-columns: 1fr 420px;
   gap: 40px;
-  align-items: center;
+  align-items: flex-start;
 }
 
 .auth-info {
   background: var(--color-primary);
   color: var(--color-text-bright);
-  padding: 48px;
+  padding: 40px;
   border-radius: 28px;
   min-height: 420px;
   display: flex;
@@ -179,14 +179,16 @@ p {
 .auth-card,
 .profile-card,
 .order-card {
-  background: var(--color-surface);
+  background: var(--color-secondary);
   border: 1px solid var(--color-border);
+  margin-top: 10px;
   border-radius: 24px;
   box-shadow: 0 18px 40px rgba(15, 15, 15, 0.08);
 }
 
 .auth-card {
   padding: 34px;
+  margin-top: 10px;
 }
 
 .auth-card h2 {
@@ -375,7 +377,7 @@ p {
 }
 
 .order-details-card {
-  background: var(--color-surface);
+  background: var(--color-secondary);
   border: 1px solid var(--color-border);
   border-radius: 24px;
   padding: 28px;

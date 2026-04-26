@@ -42,7 +42,7 @@ function Auth() {
         <section className="auth-page">
             <div className="auth-wrapper">
                 <div className="auth-info">
-                    <span className="auth-badge">Vinyl Store</span>
+                    <span className="auth-badge">Trackora</span>
                     <h1>Build your record collection.</h1>
                     <p>
                         Sign in or create an account to manage your orders, profile, and favourite records.
