@@ -618,3 +618,21 @@ p {
   border-radius: 12px;
   font-size: 14px;
 }
+
+.admin-grid {
+  display: grid !important;
+  grid-template-columns: repeat(1, 1fr);
+  gap: 20px;
+  width: 100%;
+}
+
+@media (min-width: 640px) { .admin-grid { grid-template-columns: repeat(2, 1fr); } }
+@media (min-width: 1024px) { .admin-grid { grid-template-columns: repeat(4, 1fr); } }
+@media (min-width: 1280px) { .admin-grid { grid-template-columns: repeat(5, 1fr); } }
+
+.admin-card-img {
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  object-fit: cover;
+  background: #eee;
+}
