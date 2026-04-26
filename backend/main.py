@@ -427,6 +427,10 @@ def create_order(
 
     try:
         db.add(new_order)
+        
+        #Clear cart after checkout
+        for item in cart.items:
+            db.delete(item)
 
         db.commit()
         db.refresh(new_order)
