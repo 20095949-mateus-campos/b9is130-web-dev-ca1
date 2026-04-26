@@ -303,21 +303,18 @@ def add_to_cart(
     db: Session = Depends(get_db),
     current_user: models.User = Depends(get_current_user)
 ):
-    #Check record exists
     record = db.query(models.Record).filter(models.Record.id == data.record_id).first()
     if not record:
         raise HTTPException(status_code=404, detail="Record not found")
 
-    #Get or create cart
     cart = db.query(models.Cart).filter(models.Cart.user_id == current_user.id).first()
-    
+
     if not cart:
         cart = models.Cart(user_id=current_user.id)
         db.add(cart)
         db.commit()
         db.refresh(cart)
 
-    #Check if item already in cart
     cart_item = db.query(models.CartItem).filter(
         models.CartItem.cart_id == cart.id,
         models.CartItem.record_id == data.record_id
@@ -342,17 +339,14 @@ def get_cart(
     db: Session = Depends(get_db),
     current_user: models.User = Depends(get_current_user)
 ):
-    #Get user's cart
     cart = db.query(models.Cart).filter(models.Cart.user_id == current_user.id).first()
 
-    # If no cart → return empty
     if not cart:
         return {"items": [], "total": 0}
 
     items = []
     total = 0
 
-    #Loop through cart items
     for item in cart.items:
         record = item.record
 
@@ -363,15 +357,17 @@ def get_cart(
         total += item_total
 
         items.append({
-            "record_id": record.id,
+            "id": record.id,
             "title": record.title,
-            "price": record.price,
-            "quantity": item.quantity
+            "price": float(record.price),
+            "quantity": item.quantity,
+            "cover_image": record.cover_image,
+            "description": record.description
         })
 
     return {
         "items": items,
-        "total": total
+        "total": float(total)
     }
 
 @app.delete("/cart/remove/{record_id}")
@@ -380,13 +376,11 @@ def remove_item_from_cart(
     db: Session = Depends(get_db),
     current_user: models.User = Depends(get_current_user)
 ):
-    # Get user's cart
     cart = db.query(models.Cart).filter(models.Cart.user_id == current_user.id).first()
 
     if not cart:
         raise HTTPException(status_code=404, detail="Cart not found")
 
-    #Find cart item
     cart_item = db.query(models.CartItem).filter(
         models.CartItem.cart_id == cart.id,
         models.CartItem.record_id == record_id
@@ -395,11 +389,43 @@ def remove_item_from_cart(
     if not cart_item:
         raise HTTPException(status_code=404, detail="Item not found in cart")
 
-    #Delete item
     db.delete(cart_item)
     db.commit()
 
     return {"message": "Item removed from cart"}
+
+@app.patch("/cart/update")
+def update_cart_item(
+    data: schemas.CartAdd,
+    db: Session = Depends(get_db),
+    current_user: models.User = Depends(get_current_user)
+):
+    cart = db.query(models.Cart).filter(models.Cart.user_id == current_user.id).first()
+
+    if not cart:
+        raise HTTPException(status_code=404, detail="Cart not found")
+
+    cart_item = db.query(models.CartItem).filter(
+        models.CartItem.cart_id == cart.id,
+        models.CartItem.record_id == data.record_id
+    ).first()
+
+    if not cart_item:
+        raise HTTPException(status_code=404, detail="Item not found")
+
+    record = db.query(models.Record).filter(models.Record.id == data.record_id).first()
+
+    if data.quantity > record.stock_quantity:
+        raise HTTPException(status_code=400, detail="Not enough stock")
+
+    if data.quantity < 1:
+        db.delete(cart_item)
+    else:
+        cart_item.quantity = data.quantity
+
+    db.commit()
+
+    return {"message": "Cart updated"}
 
 
 # --------- Order Endpoints ---------
