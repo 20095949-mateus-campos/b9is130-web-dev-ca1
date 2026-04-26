@@ -4,6 +4,7 @@ import Navbar from "./components/Navbar";
 import Home from "./pages/Home";
 import RecordDetail from "./pages/RecordDetail";
 import Cart from "./pages/Cart";
+import Wishlist from "./pages/Whishlist";
 
 function App() {
 
@@ -18,6 +19,7 @@ function App() {
   }, [API_URL]);
 
   return (
+    <>
     <div className="min-h-screen flex flex-col">
       <Navbar />
 
@@ -25,10 +27,12 @@ function App() {
         <Routes>
           <Route path="/" element={<Home records={data} />} />
           <Route path="/record/:id" element={<RecordDetail />} />
-          <Route path="/cart" element={<Cart />} />
+          <Route path="/cart" element={<Cart />} /> 
+          <Route path="/wishlist" element={<Wishlist />} />
         </Routes>
       </main>
     </div>
+    </>
   );
 }
 
