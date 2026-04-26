@@ -95,6 +95,22 @@ export async function getRecords(genre = "", search = "") {
         url += `?${params.toString()}`;
     }
 
-    const response = await fetch(url);
-    return handleResponse(response, "Could not load records");
+    return await response.json();
 }
+
+export const addToCartAPI = async (data, token) => {
+  const res = await fetch("http://localhost:8000/cart/add", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`, // REQUIRED (your backend uses auth)
+    },
+    body: JSON.stringify(data),
+  });
+
+  if (!res.ok) {
+    throw new Error("Failed to add to cart");
+  }
+
+  return res.json();
+};

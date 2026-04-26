@@ -2,16 +2,10 @@ import { useState, useEffect } from "react";
 import { FiUser, FiHeart, FiShoppingCart, FiSearch } from "react-icons/fi";
 import { Link } from "react-router-dom";
 import WishlistSidebar from "./WishlistSidebar";
-import { useCart } from "../context/CartContext";
 
 const Navbar = () => {
   const [wishlistOpen, setWishlistOpen] = useState(false);
-  const { cart } = useCart();
-  
-  // Calculate total items for the badge (from Version B)
-  const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0);
 
-  // ESC key handler for Wishlist (from Version A)
   useEffect(() => {
     if (!wishlistOpen) return;
     const handleEsc = (e) => e.key === "Escape" && setWishlistOpen(false);
@@ -32,15 +26,15 @@ const Navbar = () => {
         </div>
 
         {/* MAIN NAV */}
-        <div className="max-w-7xl mx-auto px-[2.5rem] py-[1.2rem] flex items-center justify-between">
+        <div className="max-w-7xl mx-auto px-[2.5rem] py-[1rem] flex items-center justify-between">
 
           {/* LOGO */}
           <Link
             to="/"
-            className="text-[3rem] ml-[2rem] font-[600] tracking-tight text-[var(--color-text)] no-underline border-none outline-none
+            className="text-[2rem] ml-[2rem] font-[600] tracking-tight text-[var(--color-text)] no-underline border-none outline-none
                       hover:no-underline focus:no-underline"
           >
-            Vinyl Store
+            Trackora
           </Link>
 
           {/* SEARCH */}
@@ -49,7 +43,7 @@ const Navbar = () => {
               flex items-center 
               bg-white/60 backdrop-blur-md
               border border-[var(--color-primary)]
-              rounded-full px-[1.2rem] h-[48px] mt-[1rem]
+              rounded-full px-[1.2rem] h-[40px]
               shadow-sm
               focus-within:ring-2 focus-within:ring-[var(--color-accent)]
               transition
@@ -70,12 +64,11 @@ const Navbar = () => {
 
           {/* ICONS */}
           <div className="flex items-center gap-4">
-        
+
             <Link to="/auth" className="nav-icon">
               <FiUser />
             </Link>
 
-            {/* Wishlist Toggle Button */}
             <button
               onClick={() => setWishlistOpen(true)}
               className="nav-icon"
@@ -83,14 +76,8 @@ const Navbar = () => {
               <FiHeart />
             </button>
 
-            {/* Cart Link with Count Badge (from Version B) */}
-            <Link to="/cart" className="relative hover:text-[var(--color-accent)] transition">
+            <Link to="/cart" className="nav-icon">
               <FiShoppingCart />
-              {totalItems > 0 && (
-                <span className="absolute -top-2 -right-3 bg-[var(--color-accent)] text-white text-[12px] font-bold px-2 py-0.5 rounded-full">
-                  {totalItems}
-                </span>
-              )}
             </Link>
 
           </div>
@@ -118,7 +105,6 @@ const Navbar = () => {
           </div>
       </nav>
 
-      {/* Sidebar Drawer Logic */}
       <WishlistSidebar
         isOpen={wishlistOpen}
         onClose={() => setWishlistOpen(false)}
