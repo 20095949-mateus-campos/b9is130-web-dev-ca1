@@ -48,6 +48,24 @@ body {
     #e5e5e5
   );
 }
+.nav-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 25px;
+  color: var(--color-text);
+  background: transparent;
+  border: none;
+  outline: none;
+  cursor: pointer;
+  transition: all 0.25s ease;
+  padding: 8px;
+}
+
+.nav-icon:hover {
+  color: var(--color-accent);
+  transform: translateY(-2px) scale(1.08);
+}
 
 #root {
   width: 100%;
