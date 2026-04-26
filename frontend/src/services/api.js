@@ -84,18 +84,15 @@ export function logoutUser() {
     localStorage.removeItem("token");
 }
 
-export async function getRecords(genre = "", search = "") {
-    let url = `${API_BASE_URL}/records`;
+export async function getRecords() {
+  const response = await fetch(`${API_BASE_URL}/records`);
 
-    const params = new URLSearchParams();
-    if (genre) params.append("genre", genre);
-    if (search) params.append("search", search);
+  if (!response.ok) {
+    throw new Error("Failed to fetch records");
+  }
 
-    if (params.toString()) {
-        url += `?${params.toString()}`;
-    }
-
-    return await response.json();
+  const data = await response.json();
+  return data;
 }
 
 export const addToCartAPI = async (data, token) => {
