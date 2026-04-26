@@ -26,7 +26,7 @@ function Auth() {
                 navigate("/profile");
             } else {
                 await registerUser(username, email, password);
-                setMessage("Account created successfully. Please sign in.");
+                setMessage("Account created. Please sign in.");
                 setMode("signin");
                 setUsername("");
                 setPassword("");
@@ -77,6 +77,7 @@ function Auth() {
                     </div>
 
                     <h2>{mode === "signin" ? "Welcome Back" : "Create Account"}</h2>
+
                     <p className="auth-subtitle">
                         {mode === "signin"
                             ? "Access your profile and order history."

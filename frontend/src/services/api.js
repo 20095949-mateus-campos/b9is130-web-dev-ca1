@@ -1,42 +1,31 @@
-const API_BASE_URL = "http://127.0.0.1:8000";
+const API_BASE_URL = import.meta.env.VITE_API_URL || "http://127.0.0.1:8000";
+
 function getToken() {
     return localStorage.getItem("token");
 }
 
 function authHeaders() {
     const token = getToken();
+    return token ? { Authorization: `Bearer ${token}` } : {};
+}
 
-    return token
-        ? {
-            Authorization: `Bearer ${token}`,
+async function handleResponse(response, fallbackMessage) {
+    if (!response.ok) {
+        let message = fallbackMessage;
+
+        try {
+            const data = await response.json();
+            message = data.detail || fallbackMessage;
+        } catch {
+            message = fallbackMessage;
         }
-        : {};
-}
 
-// Records
-export async function getRecords() {
-    try {
-        const response = await fetch(`${API_BASE_URL}/records`);
-        if (!response.ok) throw new Error("Failed to fetch records");
-        return await response.json();
-    } catch (error) {
-        console.error("API Error:", error);
-        return [];
+        throw new Error(message);
     }
+
+    return response.json();
 }
 
-export async function getRecordById(id) {
-    try {
-        const response = await fetch(`${API_BASE_URL}/records/${id}`);
-        if (!response.ok) throw new Error("Failed to fetch record");
-        return await response.json();
-    } catch (error) {
-        console.error("API Error:", error);
-        return null;
-    }
-}
-
-// Auth
 export async function loginUser(email, password) {
     const formData = new URLSearchParams();
     formData.append("username", email);
@@ -50,11 +39,7 @@ export async function loginUser(email, password) {
         body: formData,
     });
 
-    if (!response.ok) {
-        throw new Error("Invalid email or password");
-    }
-
-    const data = await response.json();
+    const data = await handleResponse(response, "Invalid email or password");
     localStorage.setItem("token", data.access_token);
     return data;
 }
@@ -68,56 +53,46 @@ export async function registerUser(username, email, password) {
         body: JSON.stringify({ username, email, password }),
     });
 
-    if (!response.ok) {
-        throw new Error("Registration failed");
-    }
+    return handleResponse(response, "Registration failed");
+}
 
-    return await response.json();
+export async function getCurrentUser() {
+    const response = await fetch(`${API_BASE_URL}/users/me`, {
+        headers: authHeaders(),
+    });
+
+    return handleResponse(response, "Please sign in first");
+}
+
+export async function getMyOrders() {
+    const response = await fetch(`${API_BASE_URL}/api/orders/my-history`, {
+        headers: authHeaders(),
+    });
+
+    return handleResponse(response, "Could not load orders");
+}
+
+export async function getOrderById(orderId) {
+    const response = await fetch(`${API_BASE_URL}/orders/${orderId}`, {
+        headers: authHeaders(),
+    });
+
+    return handleResponse(response, "Could not load order details");
 }
 
 export function logoutUser() {
     localStorage.removeItem("token");
 }
 
-// User
-export async function getCurrentUser() {
-    const response = await fetch(`${API_BASE_URL}/users/me`, {
-        headers: {
-            ...authHeaders(),
-        },
-    });
+export async function getRecords(genre = "", search = "") {
+    let url = `${API_BASE_URL}/records`;
 
-    if (!response.ok) {
-        throw new Error("Please sign in first");
-    }
+    const params = new URLSearchParams();
+    if (genre) params.append("genre", genre);
+    if (search) params.append("search", search);
 
-    return await response.json();
-}
-
-// Orders
-export async function getMyOrders() {
-    const response = await fetch(`${API_BASE_URL}/api/orders/my-history`, {
-        headers: {
-            ...authHeaders(),
-        },
-    });
-
-    if (!response.ok) {
-        throw new Error("Could not load orders");
-    }
-
-    return await response.json();
-}
-
-export async function getOrderById(orderId) {
-    const response = await fetch(`${API_BASE_URL}/orders/${orderId}`, {
-        headers: {
-            ...authHeaders(),
-        },
-    });
-
-    if (!response.ok) {
-        throw new Error("Could not load order details");
+    if (params.toString()) {
+        url += `?${params.toString()}`;
     }
 
     return await response.json();
