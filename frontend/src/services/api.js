@@ -138,6 +138,20 @@ export async function removeFromWishlistAPI(recordId) {
   return handleResponse(response, "Failed to remove from wishlist");
 }
 
+//Checkout
+export async function checkoutOrder(checkoutData) {
+    const response = await fetch(`${API_BASE_URL}/checkout`, {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+            ...authHeaders(), // already uses localStorage token
+        },
+        body: JSON.stringify(checkoutData),
+    });
+
+    return handleResponse(response, "Checkout failed");
+}
+
 export async function updateRecord(recordId, updateData) {
   const response = await fetch(`${API_BASE_URL}/records/${recordId}`, {
     method: "PATCH",

@@ -1,4 +1,4 @@
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useCart } from "../context/CartContext";
 import { FaArrowLeft } from "react-icons/fa";
 import { RiDeleteBin6Line } from "react-icons/ri";
@@ -8,12 +8,13 @@ function Cart() {
   const { cart, updateQuantity, removeFromCart } = useCart();
   const [showConfirm, setShowConfirm] = useState(false);
   const [selectedItemId, setSelectedItemId] = useState(null);
+  const navigate = useNavigate();
 
   const total = cart?.total || 0;
 
   return (
     <>
-      <div className="max-w-6xl mx-auto p-8">
+      <div className="max-w-6xl mx-auto p-8 bg-[var(--color-bg)]">
         <Link to="/" className="flex items-center gap-[10px] mx-[10rem] mt-[10px]
                                 no-underline hover:opacity-70 transition duration-200 cursor-pointer">
           <FaArrowLeft /> Home
@@ -99,7 +100,8 @@ function Cart() {
         )}
 
         <div className="mx-[10rem] mt-[10px] flex justify-end">
-          <button className="bg-[var(--color-primary)] text-[var(--color-text-bright)] px-[2rem] py-[1rem]">
+          <button onClick={() => navigate("/checkout")}
+                  className="bg-[var(--color-primary)] text-[var(--color-text-bright)] px-[2rem] py-[1rem]">
             CHECKOUT • €{total.toFixed(2)}
           </button>
         </div>

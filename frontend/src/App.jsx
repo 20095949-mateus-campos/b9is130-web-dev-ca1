@@ -10,6 +10,7 @@ import Auth from "./pages/Auth";
 import Profile from "./pages/Profile";
 import MyOrders from "./pages/MyOrders";
 import OrderDetails from "./pages/OrderDetails";
+import Checkout from "./pages/Checkout";
 import AdminCatalog from "./pages/AdminCatalog";
 
 function App() {
@@ -38,6 +39,7 @@ function App() {
           <Route path="/profile" element={<Profile />} />
           <Route path="/orders" element={<MyOrders />} />
           <Route path="/orders/:id" element={<OrderDetails />} />
+          <Route path="/checkout" element={<Checkout />} />
           <Route path="/admin/catalog" element={<AdminCatalog />} />
         </Routes>
       </main>
