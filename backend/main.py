@@ -116,6 +116,7 @@ def update_user(
 
     return current_user
 
+
 # --------- Records Endpoints ---------
 @app.get("/records", response_model=List[schemas.RecordSchema])
 def get_records(
@@ -377,8 +378,9 @@ def remove_item_from_cart(
 
 
 # --------- Order Endpoints ---------
-@app.post("/orders", status_code=201)
-def create_order(
+@app.post("/checkout")
+def checkout(
+    data: schemas.CheckoutData,
     db: Session = Depends(get_db),
     current_user: models.User = Depends(get_current_user)
 ):
@@ -388,10 +390,14 @@ def create_order(
     if not cart or not cart.items:
         raise HTTPException(status_code=400, detail="Cart is empty")
 
+    #payment validation
+    if len(data.card_number) < 8:
+        raise HTTPException(status_code=400, detail="Invalid card number")
+
     total_price = 0
     order_items = []
 
-    #Loop through cart items
+    #Process cart items
     for item in cart.items:
         record = db.query(models.Record).filter(models.Record.id == item.record_id).first()
 
@@ -429,23 +435,22 @@ def create_order(
         db.add(new_order)
         
         #Clear cart after checkout
-        for item in cart.items:
-            db.delete(item)
+        db.query(models.CartItem).filter(models.CartItem.cart_id == cart.id).delete()
 
         db.commit()
         db.refresh(new_order)
 
         return {
-            "message": "Order placed successfully",
+            "message": "Payment successful. Order placed.",
             "order_id": new_order.id,
-            "total": float(total_price)
+            "total": float(total_price),
+            "shipping_address": data.address
         }
 
     except Exception as e:
         db.rollback()
-        print(f"ORDER ERROR: {e}")
-        raise HTTPException(status_code=500, detail="Failed to create order")
-
+        print(f"CHECKOUT ERROR: {e}")
+        raise HTTPException(status_code=500, detail="Checkout failed")
 
 @app.get("/api/orders/my-history", response_model=List[schemas.OrderOut])
 def get_my_order_history(

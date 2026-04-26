@@ -115,3 +115,9 @@ class DiscogsSearchResult(BaseModel):
     year: Optional[str] = None
     genre: List[str] = []
     resource_url: str
+
+class CheckoutData(BaseModel):
+    address: str
+    card_number: str
+    card_holder: str
+    expiry_date: str
