@@ -159,6 +159,13 @@ async def get_record_by_id(record_id: int, db: Session = Depends(get_db)):
         "discogs_metadata": external_data
     }
 
+@app.get("/genres")
+def get_genres(db: Session = Depends(get_db)):
+    genres = db.query(models.Record.genre).distinct().all()
+
+    # Extract values from tuples and remove None
+    return [g[0] for g in genres if g[0] is not None]
+
 @app.post("/admin/records", response_model=schemas.RecordSchema)
 def create_record(
     record_data: schemas.RecordCreate,
@@ -342,7 +349,7 @@ def get_cart(
     }
 
 @app.delete("/cart/remove/{record_id}")
-def remove_from_cart(
+def remove_item_from_cart(
     record_id: int,
     db: Session = Depends(get_db),
     current_user: models.User = Depends(get_current_user)
