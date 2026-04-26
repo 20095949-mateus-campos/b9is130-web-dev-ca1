@@ -6,9 +6,11 @@ import { useCart } from "../context/CartContext";
 
 const Navbar = () => {
   const [wishlistOpen, setWishlistOpen] = useState(false);
-  const { cart } = useCart();
+  const { cart, token } = useCart();
 
   const [animate, setAnimate] = useState(false);
+
+  const isLoggedIn = !!token;
 
   useEffect(() => {
     if (cart.length === 0) return;
@@ -65,8 +67,11 @@ console.log("first item:", cart?.items?.[0]);
           </div>
 
           <div className="flex items-center gap-4">
-            <Link to="/auth" className="nav-icon">
-              <FiUser />
+            <Link 
+                to={isLoggedIn ? "/profile" : "/auth"} 
+                className="nav-icon"
+            >
+                <FiUser />
             </Link>
 
             <button onClick={() => setWishlistOpen(true)} className="nav-icon">
