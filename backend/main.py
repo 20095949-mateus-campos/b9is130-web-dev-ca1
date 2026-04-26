@@ -20,6 +20,7 @@ FRONTEND_URL = os.getenv("FRONTEND_URL", "http://localhost:5173")
 
 origins = [
     FRONTEND_URL,
+    "http://127.0.0.1:5173",
     "http://b9is130-record-store-api-frontend.s3-website-eu-west-1.amazonaws.com",
     "https://b9is130-web-dev-ca1.duckdns.org",
     "http://localhost:3000",
