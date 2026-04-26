@@ -69,12 +69,9 @@ const Navbar = () => {
               <FiUser />
             </Link>
 
-            <button
-              onClick={() => setWishlistOpen(true)}
-              className="nav-icon"
-            >
+            <Link to="/wishlist" className="nav-icon">
               <FiHeart />
-            </button>
+            </Link>
 
             <Link to="/cart" className="nav-icon">
               <FiShoppingCart />
