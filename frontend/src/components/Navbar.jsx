@@ -71,7 +71,7 @@ const Navbar = () => {
             to="/"
             className="text-[2rem] ml-[2rem] font-[600] tracking-tight text-[var(--color-text)] no-underline border-none outline-none hover:no-underline focus:no-underline"
           >
-            Trackora
+            Trackora CI/CD Test
           </Link>
 
           <div className="flex-1 max-w-[600px]">
