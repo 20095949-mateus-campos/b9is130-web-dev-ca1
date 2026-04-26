@@ -110,3 +110,11 @@ class UserUpdate(BaseModel):
     username: Optional[str] = None
     email: Optional[EmailStr] = None
     password: Optional[str] = None
+
+class DiscogsSearchResult(BaseModel):
+    id: int
+    title: str
+    thumb: Optional[str] = None
+    year: Optional[str] = None
+    genre: List[str] = []
+    resource_url: str
