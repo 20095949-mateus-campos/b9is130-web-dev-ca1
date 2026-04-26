@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { FaHeart, FaRegHeart } from "react-icons/fa";
 import { Link } from "react-router-dom";
 import { useWishlist } from "../context/WishlistContext";
@@ -6,32 +7,50 @@ function RecordCard({ record }) {
   const { toggleWishlist, isInWishlist } = useWishlist();
   const liked = isInWishlist(record.id);
 
+  const [style, setStyle] = useState({});
+
+  const handleMouseMove = (e) => {
+    const rect = e.currentTarget.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+
+    const midX = rect.width / 2;
+    const midY = rect.height / 2;
+
+    const rotateY = ((x - midX) / midX) * 8;
+    const rotateX = -((y - midY) / midY) * 8;
+
+    setStyle({
+      transform: `perspective(800px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale(1.03)`
+    });
+  };
+
+  const handleMouseLeave = () => {
+    setStyle({
+      transform: "perspective(800px) rotateX(0deg) rotateY(0deg) scale(1)"
+    });
+  };
+
   return (
-    <div className="w-[280px] flex-shrink-0 snap-start border-2 border-[var(--color-primary)] mx-[20px]">
-      <div className="bg-[var(--color-secondary)] shadow-sm hover:shadow-lg transition duration-300 overflow-hidden">
-
-        {/* IMAGE */}
+    <div className="w-[300px] flex-shrink-0 snap-start mx-[20px]">
+      <div
+        onMouseMove={handleMouseMove}
+        onMouseLeave={handleMouseLeave}
+        style={style}
+        className="bg-[var(--color-secondary)] shadow-sm hover:shadow-xl transition-all duration-300 overflow-hidden will-change-transform"
+      >
         <div className="relative group p-[20px]">
-
-          {/* WISHLIST ICON */}
           <button
             onClick={(e) => {
               e.preventDefault();
               e.stopPropagation();
               toggleWishlist(record);
             }}
-            className="
-              absolute top-[1.2rem] right-[1.2rem] z-20
-              text-[18px] bg-[var(--color-secondary)] border-none outline-none cursor-pointer
-              opacity-0 group-hover:opacity-100
-              transition
-              hover:scale-110
-            "
+            className="absolute top-[1.4rem] right-[1.4rem] z-20 text-[18px] bg-[var(--color-secondary)] cursor-pointer border-none opacity-0 group-hover:opacity-100 transition hover:scale-110"
           >
             {liked ? <FaHeart /> : <FaRegHeart />}
           </button>
 
-          {/* IMAGE LINK */}
           <Link to={`/record/${record.id}`}>
             <img
               src={record.cover_image}
@@ -44,21 +63,19 @@ function RecordCard({ record }) {
           </Link>
         </div>
 
-        {/* CONTENT */}
         <div className="px-[20px] pb-[20px]">
-          <p className="text-[15px] font-semibold text-gray-900">
+          <p className="text-[20px] font-[600] text-[var(--color-text)]">
             {record.title}
           </p>
 
-          <p className="text-[11px] uppercase tracking-widest text-gray-600">
+          <p className="text-[15px] mt-[10px] uppercase tracking-widest text-[var(--color-text)]">
             {record.artist}
           </p>
 
-          <p className="text-[22px] font-extrabold text-black">
+          <p className="text-[20px] font-[800] mt-[10px] text-[var(--color-text)]">
             From €{record.price}
           </p>
         </div>
-
       </div>
     </div>
   );

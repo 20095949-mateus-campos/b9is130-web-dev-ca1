@@ -14,53 +14,71 @@ const Navbar = () => {
   // ESC key handler for Wishlist (from Version A)
   useEffect(() => {
     if (!wishlistOpen) return;
-    const handleEsc = (e) => {
-      if (e.key === "Escape") setWishlistOpen(false);
-    };
+    const handleEsc = (e) => e.key === "Escape" && setWishlistOpen(false);
     window.addEventListener("keydown", handleEsc);
     return () => window.removeEventListener("keydown", handleEsc);
   }, [wishlistOpen]);
 
   return (
     <>
-      <nav className="w-full bg-[var(--color-secondary)] z-[80] shadow-sm custom-navbar">
-        {/* Shipping Bar (Unified Styles) */}
+      <nav className="w-full bg-[var(--color-secondary)] shadow-sm z-[80]">
+
+        {/* TOP BAR */}
         <div className="bg-[var(--color-accent)] text-[var(--color-soft)] text-sm overflow-hidden">
-          <div className="whitespace-nowrap animate-marquee-smooth py-2">
-            <span className="mx-12">✈ Free Shipping on Orders over €50 in Ireland</span>
+          <div className="whitespace-nowrap animate-marquee-smooth py-2 opacity-90">
             <span className="mx-12">✈ Free Shipping on Orders over €50 in Ireland</span>
             <span className="mx-12">✈ Free Shipping on Orders over €50 in Ireland</span>
           </div>
         </div>
 
-        {/* Main Nav Section */}
-        <div className="max-w-7xl mx-auto px-12 pt-6 pb-5 flex items-center justify-between">
-          <Link to="/" className="w-[220px] text-[2rem] font-semibold text-[var(--color-text)] no-underline">
+        {/* MAIN NAV */}
+        <div className="max-w-7xl mx-auto px-[2.5rem] py-[1.2rem] flex items-center justify-between">
+
+          {/* LOGO */}
+          <Link
+            to="/"
+            className="text-[3rem] ml-[2rem] font-[600] tracking-tight text-[var(--color-text)] no-underline border-none outline-none
+                      hover:no-underline focus:no-underline"
+          >
             Vinyl Store
           </Link>
 
-          {/* Search Bar */}
-          <div className="flex-1 max-w-[670px] mx-10">
-            <div className="flex items-center border border-[var(--color-primary)] rounded-[12px] px-6 h-[50px] focus-within:border-[var(--color-accent)]">
+          {/* SEARCH */}
+          <div className="flex-1 max-w-[600px]">
+            <div className="
+              flex items-center 
+              bg-white/60 backdrop-blur-md
+              border border-[var(--color-primary)]
+              rounded-full px-[1.2rem] h-[48px] mt-[1rem]
+              shadow-sm
+              focus-within:ring-2 focus-within:ring-[var(--color-accent)]
+              transition
+            ">
+              <FiSearch className="text-gray-500 text-[18px] mr-3" />
+
               <input
                 type="text"
-                placeholder="Search products"
-                className="w-full bg-transparent outline-none border-none text-[15px] text-[var(--color-text)]"
+                placeholder="Search vinyl, artists..."
+                className="
+                  w-full bg-transparent outline-none border-none
+                  text-[14px]
+                  placeholder:text-gray-400
+                "
               />
-              <FiSearch className="text-[var(--color-primary)] text-[24px] cursor-pointer" />
             </div>
           </div>
 
-          {/* Icon Section */}
-          <div className="w-[220px] flex justify-end items-center gap-10 text-[26px] text-[var(--color-text)]">
-            <Link to="/auth" className="hover:text-[var(--color-accent)] transition">
+          {/* ICONS */}
+          <div className="flex items-center gap-4">
+
+            <button className="nav-icon">
               <FiUser />
             </Link>
 
             {/* Wishlist Toggle Button */}
             <button
               onClick={() => setWishlistOpen(true)}
-              className="bg-transparent border-none outline-none cursor-pointer hover:text-[var(--color-accent)] transition"
+              className="nav-icon"
             >
               <FiHeart />
             </button>
@@ -74,6 +92,7 @@ const Navbar = () => {
                 </span>
               )}
             </Link>
+
           </div>
         </div>
 
